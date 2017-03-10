@@ -297,6 +297,7 @@ sites["zootfeed.com"] = "conspiracy"
 sites["christianpost.com"] = "half"
 sites["consortiumnews.com"] = "half"
 sites["nutritionfacts.org"] = "half"
+sites["wikipedia.org"] = "half"
 
 sites["24newsflash.com"] = "fake"
 sites["70news.wordpress.com"] = "fake"
