@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 # curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
 
-@app.route("/analyze", methods=['POST'])
+@app.route("/analyze", methods=['POST', 'OPTIONS'])
 def analyze():
     analyzer = Analyzer(request.json['query'])
     result = json.dumps(analyzer.do())
