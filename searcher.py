@@ -4,6 +4,7 @@ import threading
 import os
 import hashlib
 import re
+import shutil
 
 from goose import Goose
 from google import search, get_page
@@ -22,13 +23,9 @@ class Searcher:
 		start_search = not os.path.exists(self.articledir)
 
 		if not start_search:
-			start_search = len([name for name in os.listdir('.') if os.path.isfile(name)]) < 5
-			for d in os.listdir(self.articledir):
-			    try:
-			        if os.path.isfile(self.articledir + d):
-			            os.unlink(self.articledir + d)
-			    except Exception as e:
-			        print(e)
+			start_search = len([name for name in os.listdir(self.articledir) if os.path.isfile(name)]) < 5
+			if start_search:
+				shutil.rmtree(self.articledir, ignore_errors=True)
 
 		if start_search:
 		 	os.makedirs(self.articledir)		
