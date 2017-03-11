@@ -31,7 +31,7 @@ class Searcher:
 		 	os.makedirs(self.articledir)		
 			count = 0
 			threads = []
-			for url in search(self.query, tld='com', lang='en', stop=10):
+			for url in search(self.query, tld='com', lang='en', stop=20):
 				filename = str(count)
 				extractor = Goose()
 				t = threading.Thread(target=self.__article_worker, args=(extractor, filename, url,))
