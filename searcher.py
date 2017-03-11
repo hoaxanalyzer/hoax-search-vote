@@ -23,7 +23,7 @@ class Searcher:
 		start_search = not os.path.exists(self.articledir)
 
 		if not start_search:
-			start_search = len([name for name in os.listdir(self.articledir) if os.path.isfile(name)]) < 5
+			start_search = len(os.listdir(self.articledir)) < 5
 			if start_search:
 				shutil.rmtree(self.articledir, ignore_errors=True)
 
