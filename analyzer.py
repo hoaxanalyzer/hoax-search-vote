@@ -37,11 +37,12 @@ class Analyzer:
 	def __get_references(self, dataset, label):
 		meta = sorted(dataset, key=lambda x: (x.date, x.url_score), reverse=True)
 		selected = []
-		for m in meta:
-			if m.label == label:
-				selected.append(m)	
+		## Intented, yang berlawanan duluan ditampilin
 		for m in meta:
 			if m.label != label and m.label != 'unrelated':
+				selected.append(m)	
+		for m in meta:
+			if m.label == label:
 				selected.append(m)	
 		return selected
 
