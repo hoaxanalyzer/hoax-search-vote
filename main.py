@@ -16,16 +16,13 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 @app.route("/")
 def index():
-	return "OK"
+	return "Hoax Analyzer - Search and Vote API"
 
-@app.route("/analyze")
+@app.route("/analyze", methods=['POST'])
 def analyze():
-	if request.method == 'POST':
-	    analyzer = Analyzer(request.json['query'])
-	    result = json.dumps(analyzer.do())
-	    return result
-	else:
-		return "OK"
+    analyzer = Analyzer(request.json['query'])
+    result = json.dumps(analyzer.do())
+    return result
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
