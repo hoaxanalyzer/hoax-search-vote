@@ -23,6 +23,7 @@ class Article:
 			with open("./models/sites.hash", "r") as file:
 				Article.sitedata = pickle.load(file)
 		self.url = url
+		self.url_base = url
 		self.url_score = self._site_type(url)
 	    
 		self.content = content
@@ -79,6 +80,7 @@ class Article:
 
 		domain = ""
 		domain = clean_domain[:-1]
+		self.url_base = domain
 
 		if domain in Article.sitedata:
 			if Article.sitedata[domain] == 'credible': return 2
