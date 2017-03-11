@@ -14,6 +14,10 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 # curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
 
+@app.route("/")
+def index():
+	return "OK"
+
 @app.route("/analyze")
 def analyze():
 	if request.method == 'POST':
