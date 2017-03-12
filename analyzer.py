@@ -43,12 +43,15 @@ class Analyzer:
 		return selected
 
 	def do(self):
+		print("Search for " + self.query)
 		dataset = []
 		query = self.query + ' hoax'
 
 		s = Searcher(query)
-		s.search_google()
-		dataset = s.get_news_google()
+		if not s.check_cache():
+			last = s.search_google(0, True)
+			s.search_bing(last, False)
+		dataset = s.get_news()
 		dataset = self.__calculate_weight(dataset)
 
 		sentences = []
