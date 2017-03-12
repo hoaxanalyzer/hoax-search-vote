@@ -60,7 +60,7 @@ class Searcher:
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
 			logging.info(elem)
-		    print(elem)
+			print(elem)
 		    #None
 		print("Finish Data Gathering - Google")
 		logging.info("Finish Data Gathering - Google")
@@ -82,7 +82,7 @@ class Searcher:
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
 			logging.info(elem)
-		    print(elem)
+			print(elem)
 		    #None
 		print("Finish Data Gathering - Bing")
 		logging.info("Finish Data Gathering - Bing")
