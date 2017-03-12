@@ -4,7 +4,7 @@ import json
 from analyzer import Analyzer
 
 from flask import Flask
-from flask import request
+from flask import request, response
 from flask_cors import CORS, cross_origin
 
 application = Flask(__name__)
@@ -22,6 +22,7 @@ def index():
 def analyze():
     analyzer = Analyzer(request.json['query'])
     result = json.dumps(analyzer.do())
+    response.headers.add('Access-Control-Allow-Origin', '*')
     return result
 
 if __name__ == "__main__":

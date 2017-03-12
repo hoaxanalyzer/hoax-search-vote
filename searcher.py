@@ -56,12 +56,14 @@ class Searcher:
 			obj["date"] = None
 			data.append(obj)
 			count += 1
-		executor = ProcessKillingExecutor(max_workers=cpu_count())
+		executor = ProcessKillingExecutor(max_workers=3)
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
+			logging.info(elem)
 		    print(elem)
 		    #None
 		print("Finish Data Gathering - Google")
+		logging.info("Finish Data Gathering - Google")
 		return count
 
 	def search_bing(self, start=0, check=True):
@@ -76,12 +78,14 @@ class Searcher:
 			obj["date"] = date
 			data.append(obj)
 			count += 1
-		executor = ProcessKillingExecutor(max_workers=cpu_count())
+		executor = ProcessKillingExecutor(max_workers=3)
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
+			logging.info(elem)
 		    print(elem)
 		    #None
 		print("Finish Data Gathering - Bing")
+		logging.info("Finish Data Gathering - Bing")
 		return count
 
 	def get_news(self):
