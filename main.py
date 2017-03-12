@@ -5,12 +5,18 @@ from analyzer import Analyzer
 
 from flask import Flask
 from flask import request
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app)
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 # curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
+
+@app.route("/")
+def index():
+	return "Hoax Analyzer - Search and Vote API"
 
 @app.route("/analyze", methods=['POST'])
 def analyze():

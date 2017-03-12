@@ -34,9 +34,13 @@ class Analyzer:
 			i += 1
 		return dataset
 
-	def __best_reference(self, dataset, label):
+	def __get_references(self, dataset, label):
 		meta = sorted(dataset, key=lambda x: (x.date, x.url_score), reverse=True)
 		selected = []
+		## Intented, yang berlawanan duluan ditampilin
+		for m in meta:
+			if m.label != label and m.label != 'unrelated':
+				selected.append(m)	
 		for m in meta:
 			if m.label == label:
 				selected.append(m)	
@@ -75,12 +79,13 @@ class Analyzer:
 
 		ridx = self.__do_voting(conclusion)
 
-		references = self.__best_reference(dataset, Analyzer.target[ridx])
+		references = self.__get_references(dataset, Analyzer.target[ridx])
 		lor = []
 		for r in references:
 			data = {}
 			data["url"] = r.url
-			data["content"] = r.content
+			data["url_base"] = r.url_base
+			data["label"] = r.label
 			lor.append(data)
 
 		result = {}
