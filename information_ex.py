@@ -32,6 +32,7 @@ with open('stopwords_en.txt', 'r') as myfile:
 ##################
 
 def preprocess(text):
+	text = ''.join([x for x in text if ord(x) < 128])
 	text = text.decode("ascii", "replace").replace(u"\ufffd", "_").replace("___", "'").replace("'s", " ").replace("``", " ").replace("''", " ").replace("_", " ")
 	tokens = text.split(" ")
 	result = ""
