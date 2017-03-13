@@ -36,7 +36,7 @@ def visualize_tree(tree, feature_names):
         exit("Could not run dot, ie graphviz, to "
              "produce visualization")
 
-df = get_data("./models/dataset-01-rev-labeled.csv")
+df = get_data("../dataset-01-rev-labeled.csv")
 df2, targets = encode_target(df, "label")
 
 print(targets)

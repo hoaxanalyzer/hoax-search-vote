@@ -63,7 +63,7 @@ class Analyzer:
 
 		similar = Similar(query, sentences)
 
-		dt = joblib.load('./models/model01-rev.pkl') 
+		dt = joblib.load('./models/model02.pkl') 
 
 		i = 0
 		conclusion = [0] * 4
