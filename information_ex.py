@@ -261,6 +261,8 @@ def generate_query(text):
 	json_data = json.dumps(json_data)
 	logging.info("JSON to MSCS: " + json_data)
 	key_phrase_analysis = detect_key_phrases(json_data)
+
+	logging.info("Result: " + key_phrase_analysis)
 	key_phrase_result = ""
 	for key in key_phrase_analysis:
 		key_phrase_result += " ".join(map(str,key['keyPhrases']))
@@ -274,6 +276,8 @@ def generate_query(text):
 
 	tf = term_frequencies(tokens, selected_entities, key_phrase_tokens)
 	selected_words = select_words(tf)
+
+	logging.info("Sel entities: " + selected_entities + " | Sel words: " + selected_words)
 
 	query = build_query(selected_entities, selected_words)
 	return query
