@@ -28,8 +28,8 @@ def analyze():
 	extracted_query = re.sub(r"(null_)\d", "", extracted_query)
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
-    analyzer = Analyzer(extracted_query)
-    result = json.dumps(analyzer.do())
+	analyzer = Analyzer(extracted_query)
+	result = json.dumps(analyzer.do())
 	return result
 
 @application.after_request
