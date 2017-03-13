@@ -269,12 +269,17 @@ def generate_query(text):
 	key_phrase_tokens = tokenize(key_phrase_result)
 
 	tokens = tokenize(text)
+	logging.info("TOkens: " + str(tokens))
 	ne_chunk = chunk_words(tokens)
+	logging.info("ne_chunk: " + str(ne_chunk))
 	ent = entity_recognition(ne_chunk)
+	logging.info("ent: " + str(ent))
 	ent_res = count_entity(ent, " ".join(tokens), key_phrase_tokens)
+	logging.info("entres: " + str(ent_res))
 	selected_entities = select_entity(ent_res)
 
 	tf = term_frequencies(tokens, selected_entities, key_phrase_tokens)
+	logging.info("TFTF: " + str(tf))
 	selected_words = select_words(tf)
 
 	logging.info("Sel entities: " + str(selected_entities) + " | Sel words: " + str(selected_words))
