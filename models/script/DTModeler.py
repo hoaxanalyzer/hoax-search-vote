@@ -36,7 +36,7 @@ def visualize_tree(tree, feature_names):
         exit("Could not run dot, ie graphviz, to "
              "produce visualization")
 
-df = get_data("../dataset-01-rev-labeled.csv")
+df = get_data("../dataset-02-labeled.csv")
 df2, targets = encode_target(df, "label")
 
 print(targets)
@@ -45,11 +45,11 @@ print("* features:", features, sep="\n")
 
 y = df2["target"]
 X = df2[features]
-dt = DecisionTreeClassifier(min_samples_split=20, random_state=99)
-#dt = svm.SVC(probability=True)
+#dt = DecisionTreeClassifier(min_samples_split=20, random_state=99)
+dt = svm.SVC(decision_function_shape='ovo')
 dt.fit(X, y)
 
-visualize_tree(dt, features)
+#visualize_tree(dt, features)
 
 #iris = load_iris()
 #print(iris.data[:1, :])
@@ -57,5 +57,5 @@ visualize_tree(dt, features)
 
 #print(dt.predict_proba([[0.0, 0.0758883, 0.2195]]))
 
-joblib.dump(dt, 'model01-rev.pkl') 
+joblib.dump(dt, 'model02-svm.pkl') 
 

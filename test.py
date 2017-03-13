@@ -3,7 +3,7 @@ import json
 
 from analyzer import Analyzer
 
-queries = ["Dota 9 has officially released"]
+queries = ["free cone day queen daily hold hoax"]
 
 for query in queries:
 	analyzer = Analyzer(query)
