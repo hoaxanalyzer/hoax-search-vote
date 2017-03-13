@@ -22,8 +22,8 @@ def index():
 
 @application.route("/analyze", methods=['POST'])
 def analyze():
-	print(request.json)
 	query = request.json['query']
+	logging.info("Getting query: " + query)
 	extracted_query = generate_query(query)
 	extracted_query = re.sub(r"(null_)\d", "", extracted_query)
 	extracted_query = extracted_query.strip()
