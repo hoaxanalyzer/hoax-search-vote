@@ -3,7 +3,8 @@ import json
 
 from analyzer import Analyzer
 
-queries = ["Free Cone Day from Daily Queen Holding"]
+queries = ["Alan Rickman Death",
+			"Death of Alan Rickman"]
 
 for query in queries:
 	analyzer = Analyzer(query)
