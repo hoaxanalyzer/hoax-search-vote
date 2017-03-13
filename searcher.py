@@ -61,7 +61,7 @@ class Searcher:
 			obj["date"] = None
 			data.append(obj)
 			count += 1
-		executor = ProcessKillingExecutor(max_workers=3)
+		executor = ProcessKillingExecutor(max_workers=cpu_count())
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
 			logging.info(elem)
