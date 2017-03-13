@@ -246,6 +246,8 @@ def generate_query(text):
     # with open(filename, 'r') as myfile:
     #     text = myfile.read().replace('\n', '')
     text = preprocess(text)
+    print(text)
+	logging.info("Text to MSCS: " + text)
     
     json_data = {}
     json_doc = []
@@ -255,6 +257,7 @@ def generate_query(text):
     json_doc.append(json_text)
     json_data["documents"] = json_doc
     json_data = json.dumps(json_data)
+	logging.info("JSON to MSCS: " + json_data)
     key_phrase_analysis = detect_key_phrases(json_data)
     key_phrase_result = ""
     for key in key_phrase_analysis:
