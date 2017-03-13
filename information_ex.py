@@ -13,7 +13,9 @@ import pattern.en as en
 import re
 import string
 import sys
+import logging
 
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 # st = StanfordNERTagger('lib/stanford-ner/classifiers/english.all.3class.distsim.crf.ser.gz', 'lib/stanford-ner/stanford-ner.jar')
 n_entities = 3
