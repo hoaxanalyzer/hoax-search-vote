@@ -3,8 +3,7 @@ import json
 
 from analyzer import Analyzer
 
-queries = ["Alan Rickman Death",
-			"Death of Alan Rickman"]
+queries = ["dementor zambia"]
 
 for query in queries:
 	analyzer = Analyzer(query)

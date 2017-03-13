@@ -47,9 +47,9 @@ class Analyzer:
 		return selected
 
 	def do(self):
-		print("Search for " + self.query)
 		dataset = []
 		query = self.query + ' hoax'
+		print("Search for " + query)
 
 		s = Searcher(query)
 		if not s.check_cache():

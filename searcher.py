@@ -20,9 +20,14 @@ from article import Article
 
 class Searcher:
 	basedir = "news"
+	factgram = ["real", "official", "officially", "true", "truth"]
 
 	def __init__(self, query):
 		self.query = re.sub(r"[^\w\s]|_+", ' ', query.lower())
+
+		for w in Searcher.factgram:
+			self.query = self.query.replace(w, ' ')
+
 		self.query_hash = hashlib.sha256(self.query).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
 
@@ -78,7 +83,7 @@ class Searcher:
 			obj["date"] = date
 			data.append(obj)
 			count += 1
-		executor = ProcessKillingExecutor(max_workers=3)
+		executor = ProcessKillingExecutor(max_workers=cpu_count())
 		generator = executor.map(self.__article_worker, data, timeout=35)
 		for elem in generator:
 			logging.info(elem)
