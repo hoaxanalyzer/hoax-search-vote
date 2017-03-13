@@ -24,8 +24,8 @@ change_threshold = 1.0
 dictionary = enchant.Dict("en_US")
 
 with open('stopwords_en.txt', 'r') as myfile:
-    hoax_stopwords = myfile.read()
-    hoax_stopwords = word_tokenize(hoax_stopwords)
+	hoax_stopwords = myfile.read()
+	hoax_stopwords = word_tokenize(hoax_stopwords)
 
 ##################
 ### PREPROCESS ###
@@ -55,7 +55,7 @@ def tokenize(text):
 
 
 def chunk_words(tokens):
-    return ne_chunk(pos_tag(tokens))
+	return ne_chunk(pos_tag(tokens))
 
 ##########################
 ### ENTITY RECOGNITION ###
@@ -69,36 +69,36 @@ def chunk_words(tokens):
 #             print tag
 
 def entity_recognition(chunked):
-    continuous_chunk = []
-    current_chunk = []
-    for i in chunked:
-            if type(i) == Tree:
-                    current_chunk.append(" ".join([token for token, pos in i.leaves()]))
-            elif current_chunk:
-                    named_entity = " ".join(current_chunk)
-                    if named_entity not in continuous_chunk:
-                            continuous_chunk.append(named_entity)
-                            current_chunk = []
-            else:
-                    continue
+	continuous_chunk = []
+	current_chunk = []
+	for i in chunked:
+			if type(i) == Tree:
+					current_chunk.append(" ".join([token for token, pos in i.leaves()]))
+			elif current_chunk:
+					named_entity = " ".join(current_chunk)
+					if named_entity not in continuous_chunk:
+							continuous_chunk.append(named_entity)
+							current_chunk = []
+			else:
+					continue
 
-    # entities = []
-    # for entity in continuous_chunk:
-    # 	ent = ''
-    # 	for idx, word in enumerate(entity.split(' ')):
-    # 		if idx > 0:
-    # 			if word == entity[idx-1]:
-    # 				continue
-    # 			elif len(ent) > 0:
-    # 				ent += ' ' + word
-    # 			else:
-    # 				ent += word
-    # 		else:
-    # 			ent += word
-    # 		if ent not in entities:
-    # 			entities.append(ent)
-    # return entities
-    return continuous_chunk
+	# entities = []
+	# for entity in continuous_chunk:
+	# 	ent = ''
+	# 	for idx, word in enumerate(entity.split(' ')):
+	# 		if idx > 0:
+	# 			if word == entity[idx-1]:
+	# 				continue
+	# 			elif len(ent) > 0:
+	# 				ent += ' ' + word
+	# 			else:
+	# 				ent += word
+	# 		else:
+	# 			ent += word
+	# 		if ent not in entities:
+	# 			entities.append(ent)
+	# return entities
+	return continuous_chunk
 
 def count_entity(entities, text, key_phrase_tokens):
 	tf = {}
@@ -242,45 +242,45 @@ def build_query(selected_entities, selected_words):
 	return query
 
 def generate_query(text):
-    # filename = sys.argv[1]
-    # with open(filename, 'r') as myfile:
-    #     text = myfile.read().replace('\n', '')
-    text = preprocess(text)
-    print(text)
+	# filename = sys.argv[1]
+	# with open(filename, 'r') as myfile:
+	#     text = myfile.read().replace('\n', '')
+	text = preprocess(text)
+	print(text)
 	logging.info("Text to MSCS: " + text)
-    
-    json_data = {}
-    json_doc = []
-    json_text = {}
-    json_text["id"] = "1"
-    json_text["text"] = text
-    json_doc.append(json_text)
-    json_data["documents"] = json_doc
-    json_data = json.dumps(json_data)
+
+	json_data = {}
+	json_doc = []
+	json_text = {}
+	json_text["id"] = "1"
+	json_text["text"] = text
+	json_doc.append(json_text)
+	json_data["documents"] = json_doc
+	json_data = json.dumps(json_data)
 	logging.info("JSON to MSCS: " + json_data)
-    key_phrase_analysis = detect_key_phrases(json_data)
-    key_phrase_result = ""
-    for key in key_phrase_analysis:
-        key_phrase_result += " ".join(map(str,key['keyPhrases']))
-    key_phrase_tokens = tokenize(key_phrase_result)
+	key_phrase_analysis = detect_key_phrases(json_data)
+	key_phrase_result = ""
+	for key in key_phrase_analysis:
+		key_phrase_result += " ".join(map(str,key['keyPhrases']))
+	key_phrase_tokens = tokenize(key_phrase_result)
 
-    tokens = tokenize(text)
-    ne_chunk = chunk_words(tokens)
-    ent = entity_recognition(ne_chunk)
-    ent_res = count_entity(ent, " ".join(tokens), key_phrase_tokens)
-    selected_entities = select_entity(ent_res)
+	tokens = tokenize(text)
+	ne_chunk = chunk_words(tokens)
+	ent = entity_recognition(ne_chunk)
+	ent_res = count_entity(ent, " ".join(tokens), key_phrase_tokens)
+	selected_entities = select_entity(ent_res)
 
-    tf = term_frequencies(tokens, selected_entities, key_phrase_tokens)
-    selected_words = select_words(tf)
+	tf = term_frequencies(tokens, selected_entities, key_phrase_tokens)
+	selected_words = select_words(tf)
 
-    query = build_query(selected_entities, selected_words)
-    return query
+	query = build_query(selected_entities, selected_words)
+	return query
 
 def test():
-    filename = sys.argv[1]
-    with open(filename, 'r') as myfile:
-        text = myfile.read().replace('\n', '')
-    print generate_query(text)
+	filename = sys.argv[1]
+	with open(filename, 'r') as myfile:
+		text = myfile.read().replace('\n', '')
+	print generate_query(text)
 	# text = preprocess(text)    
 	# print text, "\n\n"
 
@@ -332,4 +332,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+	main()
