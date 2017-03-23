@@ -17,17 +17,26 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 # curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
 
+def detect_client():	
+	client = {}
+	client['ip'] = '0.0.0.0'
+	client['browser'] = 'Undetected'
+
+	if 'ip' in request.json:
+		client['ip'] = request.json['ip']
+	if 'browser' in request.json:
+		client['browser'] = request.json['browser']
+
+	return client
+
 @application.route("/")
 def index():
 	return "Hoax Analyzer - Search and Vote API"
 
 @application.route("/analyze", methods=['POST'])
 def analyze():
-	client = {}
-	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-	client['browser'] = request.headers.get('User-Agent')
-
 	try:
+		client = detect_client()
 		query = request.json['query']
 		query = query.replace('\n', '')
 		
@@ -45,11 +54,8 @@ def analyze():
 
 @application.route("/result", methods=['POST'])
 def result():
-	client = {}
-	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-	client['browser'] = request.headers.get('User-Agent')
-
 	try:
+		client = detect_client()
 		quuid = request.json['id']
 		
 		analyzer = Analyzer("", "", client)
@@ -60,11 +66,9 @@ def result():
 
 @application.route("/feedback/result", methods=['POST'])
 def feedback_result():
-	client = {}
-	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-	client['browser'] = request.headers.get('User-Agent')
-
 	try:
+		client = detect_client()
+
 		is_know = request.json['isKnow']
 		label = request.json['label']
 		reason = request.json['reason']
@@ -78,11 +82,9 @@ def feedback_result():
 
 @application.route("/feedback/reference", methods=['POST'])
 def feedback_reference():
-	client = {}
-	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-	client['browser'] = request.headers.get('User-Agent')
-
 	try:
+		client = detect_client()
+
 		is_related = request.json['isRelated']
 		label = request.json['label']
 		reason = request.json['reason']
