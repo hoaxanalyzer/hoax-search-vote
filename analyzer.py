@@ -11,10 +11,9 @@ from database import Database
 class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
-	def __init__(self, text, query, client=None, qhash=None):
+	def __init__(self, text, query, client=None):
 		self.text = text
 		self.query = query
-		self.qhash = qhash
 		
 		self.client = client
 		if not type(self.client) is dict:
@@ -55,40 +54,6 @@ class Analyzer:
 				selected.append(m)	
 		return selected
 
-	def generate_dataset(self):
-		dataset = []
-		query = self.query
-		print("Generate dataset for " + query)
-
-		s = Searcher(query)
-		if (not s.check_cache()) and (self.qhash == None):
-			s.search_all()
-		dataset = s.get_news(self.qhash)
-
-		sentences = []
-		for article in dataset:
-			sentences.append(article.content_clean)
-
-		similar = Similar(query, sentences)
-
-		i = 0
-		for num, result in similar.rank:
-		 	article = dataset[num]
-		 	article.set_similarity(result)
-			i += 1
-
-		thehash = s.query_hash
-		if self.qhash != None:
-			thehash = self.qhash
-
-		filename = "dataset/feature-" + thehash
-		with open(filename, 'w') as file:
-			for a in dataset:
-			 	featurescsv = ""
-			 	for fea in a.get_features_array():
-		 			featurescsv += ", " + str(fea)
-				file.write('"' + self.query + '", ' + thehash + ', ' + a.filename + str(featurescsv) + ', unlabeled\n')
-
 	def do(self):
 		dataset = []
 		query = self.query + ' hoax'
@@ -100,11 +65,8 @@ class Analyzer:
 		if not "browser" in self.client.keys():
 			self.client["browser"] = "unknown"
 
-		if self.qhash == None:
-			s.set_qid(self.db.insert_query_log(uuid.uuid4().hex, self.text, query, s.query_hash, self.client["ip"], self.client["browser"]))
-			dataset = s.search_all()
-		else:
-			dataset = s.get_news(self.qhash)
+		s.set_qid(self.db.insert_query_log(uuid.uuid4().hex, self.text, query, s.query_hash, self.client["ip"], self.client["browser"]))
+		dataset = s.search_all()
 		dataset = self.__calculate_weight(dataset)
 
 		sentences = []

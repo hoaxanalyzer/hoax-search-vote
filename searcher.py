@@ -39,6 +39,7 @@ class Searcher:
 		self.query_hash = hashlib.sha256(self.query).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
 		self.db = Database()
+		self.qid = -1
 
 	def set_qid(self, qid):
 		self.qid = qid

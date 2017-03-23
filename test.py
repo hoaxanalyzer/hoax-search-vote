@@ -212,7 +212,8 @@ testqueries = ["Free Cone Day from Daily Queen Holding",
 
 ### TEST ONLY ONE QUERY with SPECIFIC HASH ###
 specific = ["Weapons-wielding clowns from the U.S. invaded Canada and murdered 23 victims.", "ff8d9d0afff3f1b09aa869bb18c509619e7350bc51c40a76496820756bf84003"]
-analyzer = Analyzer("", "anjing is flat", None, "97a3c518048f46be982973635c3c78ec")
+#analyzer = Analyzer("", "anjing is flat", None, "97a3c518048f46be982973635c3c78ec")
+analyzer = Analyzer("", "earth is flat")
 result = analyzer.do()
 print result
 

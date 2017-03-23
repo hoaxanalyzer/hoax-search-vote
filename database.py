@@ -27,21 +27,21 @@ class Database:
 		return self.cur.lastrowid
 
 	def insert_result_log(self, qid, hoax, fact, unknown, unrelated, conclusion): 	
-		sql = "INSERT INTO log_query (id_query, finished_at, hoax_score, fact_score, unknown_score, unrelated_score, conclusion) VALUES" + \
-					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (query_hash, datetime.now(), hoax, fact, unknown, unrelated, conclusion)
+		sql = "INSERT INTO log_result (id_query, finished_at, hoax_score, fact_score, unknown_score, unrelated_score, conclusion) VALUES" + \
+					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (qid, datetime.now(), hoax, fact, unknown, unrelated, conclusion)
 		self.cur.execute(sql)
 		self.conn.commit()
 		return self.cur.lastrowid
 
 	def insert_result_feedback(self, qhash, is_know, reason, label, ip, browser): 	
-		sql = "INSERT INTO log_query (query_hash, reported_at, is_know, reason, feedback_label, client_ip, client_browser) VALUES" + \
+		sql = "INSERT INTO feedback_result (query_hash, reported_at, is_know, reason, feedback_label, client_ip, client_browser) VALUES" + \
 					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (qhash, datetime.now(), is_know, reason, label, ip, browser)
 		self.cur.execute(sql)
 		self.conn.commit()
 		return self.cur.lastrowid
 
 	def insert_reference_feedback(self, ahash, is_relevant, reason, label, ip, browser): 	
-		sql = "INSERT INTO log_query (article_hash, reported_at, is_know, reason, feedback_label, client_ip, client_browser) VALUES" + \
+		sql = "INSERT INTO feedback_reference (article_hash, reported_at, is_know, reason, feedback_label, client_ip, client_browser) VALUES" + \
 					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (ahash, datetime.now(), is_relevant, reason, label, ip, browser)
 		self.cur.execute(sql)
 		self.conn.commit()
