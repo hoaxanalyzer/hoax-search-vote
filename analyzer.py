@@ -20,6 +20,9 @@ class Analyzer:
 			self.client = {}
 
 		self.db = Database()
+	
+	def _get_query_hoax(self):
+		return self.query + ' hoax'
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
@@ -54,67 +57,103 @@ class Analyzer:
 				selected.append(m)	
 		return selected
 
-	def do(self):
-		dataset = []
-		query = self.query + ' hoax'
-
-		s = Searcher(query)
-
-		if not "ip" in self.client.keys():
-			self.client["ip"] = "unknown"
-		if not "browser" in self.client.keys():
-			self.client["browser"] = "unknown"
-
-		s.set_qid(self.db.insert_query_log(uuid.uuid4().hex, self.text, query, s.query_hash, self.client["ip"], self.client["browser"]))
-		dataset = s.search_all()
+	def _get_conclusion(self, dataset):
 		dataset = self.__calculate_weight(dataset)
 
 		sentences = []
 		for article in dataset:
 			sentences.append(article.content_clean)
 
-		similar = Similar(query, sentences)
-
+		similar = Similar(self._get_query_hoax(), sentences)
 		clf = joblib.load('./models/model03-combined-mlp.pkl') 
-
 		i = 0
 		conclusion = [0] * 4
-		print(conclusion)
+
 		for num, result in similar.rank:
 		 	article = dataset[num]
 		 	article.set_similarity(result)
 			idx = clf.predict([article.get_features_array()])[0]
 			article.set_label(Analyzer.target[idx])
-			print("label: " + article.label)
-			print("idx label: " + str(idx))
 			conclusion[idx] += 1
 			if idx != 0: conclusion[idx] += article.weight
-			print(conclusion)
 			i += 1
-		print("Final")
-		print(conclusion)
+		return conclusion
 
+	def retrieve(self, loghash):
+		query = self.db.get_query_by_loghash(loghash)
+		if not query == None:
+			self.query = query[3]
+
+			s = Searcher("this is not query")
+			dataset = s.get_news(query[4])
+
+			conclusion = self._get_conclusion(dataset)
+			ridx = self.__do_voting(conclusion)
+			references = self.__get_references(dataset, Analyzer.target[ridx])
+
+			lor = []
+			for r in references:
+				data = {}
+				data["url"] = r.url
+				data["url_base"] = r.url_base
+				data["label"] = r.label
+				data["text"] = r.content
+				data["id"] = r.ahash
+				lor.append(data)
+
+			result = {}
+			result["inputText"] = query[2]
+			result["hash"] = query[4]
+			result["conclusion"] = Analyzer.target[ridx]
+			result["scores"] = conclusion
+			result["references"] = lor
+			result["status"] = "Success"
+			result["id"] = loghash
+
+			self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
+		else:
+			result = {}
+			result["status"] = "Failed"
+			result["message"] = "Query not found"
+		return result
+		
+
+	def do(self):
+		dataset = []
+
+		s = Searcher(self._get_query_hoax())
+
+		if not "ip" in self.client.keys():
+			self.client["ip"] = "unknown"
+		if not "browser" in self.client.keys():
+			self.client["browser"] = "unknown"
+
+		query_uuid = uuid.uuid4().hex
+		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
+		dataset = s.search_all()
+
+		conclusion = self._get_conclusion(dataset)
 		ridx = self.__do_voting(conclusion)
-
 		references = self.__get_references(dataset, Analyzer.target[ridx])
+
 		lor = []
 		for r in references:
 			data = {}
 			data["url"] = r.url
 			data["url_base"] = r.url_base
 			data["label"] = r.label
+			data["text"] = r.content
+			data["id"] = r.ahash
 			lor.append(data)
 
 		result = {}
-		result["query"] = query
+		result["query"] = self.query
 		result["hash"] = s.query_hash
-
 		result["conclusion"] = Analyzer.target[ridx]
 		result["scores"] = conclusion
-
 		result["references"] = lor
+		result["status"] = "Success"
+		result["id"] = query_uuid
 
 		self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
 		return result
-
-

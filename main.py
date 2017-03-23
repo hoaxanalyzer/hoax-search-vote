@@ -3,6 +3,7 @@ import json
 import re
 
 from analyzer import Analyzer
+from feedback import Feedback
 from information_ex import generate_query
 
 from flask import Flask
@@ -26,17 +27,71 @@ def analyze():
 	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 	client['browser'] = request.headers.get('User-Agent')
 
-	query = request.json['query']
-	query = query.replace('\n', '')
-	
-	logging.info("Getting query: " + query)
+	try:
+		query = request.json['query']
+		query = query.replace('\n', '')
+		
+		logging.info("Getting query: " + query)
 
-	extracted_query = generate_query(query)
-	extracted_query = re.sub(r"(null_)\d", "", extracted_query)
-	extracted_query = extracted_query.strip()
-	extracted_query = extracted_query.lower()
-	analyzer = Analyzer(query, extracted_query, client)
-	result = json.dumps(analyzer.do())
+		extracted_query = generate_query(query)
+		extracted_query = re.sub(r"(null_)\d", "", extracted_query)
+		extracted_query = extracted_query.strip()
+		extracted_query = extracted_query.lower()
+		analyzer = Analyzer(query, extracted_query, client)
+		result = json.dumps(analyzer.do())
+	except:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	return result
+
+@application.route("/result", methods=['POST'])
+def result():
+	client = {}
+	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+	client['browser'] = request.headers.get('User-Agent')
+
+	try:
+		quuid = request.json['id']
+		
+		analyzer = Analyzer("", "", client)
+		result = json.dumps(analyzer.retrieve(quuid))
+	except:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	return result
+
+@application.route("/feedback/result", methods=['POST'])
+def feedback_result():
+	client = {}
+	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+	client['browser'] = request.headers.get('User-Agent')
+
+	try:
+		is_know = request.json['isKnow']
+		label = request.json['label']
+		reason = request.json['reason']
+		quuid = request.json['id']
+		
+		feedback = Feedback(client)
+		result = json.dumps(feedback.result(is_know, label, reason, quuid))
+	except:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	return result
+
+@application.route("/feedback/reference", methods=['POST'])
+def feedback_reference():
+	client = {}
+	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+	client['browser'] = request.headers.get('User-Agent')
+
+	try:
+		is_related = request.json['isRelated']
+		label = request.json['label']
+		reason = request.json['reason']
+		auuid = request.json['id']
+		
+		feedback = Feedback(client)
+		result = json.dumps(feedback.reference(is_related, label, reason, auuid	))
+	except:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
 	return result
 
 @application.after_request

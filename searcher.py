@@ -93,8 +93,8 @@ class Searcher:
 		print("Finish Data Gathering")
 		logging.info("Finish Data Gathering")
 
-	def get_news(self, loghash):
-		articles = self.db.get_references_by_loghash(loghash)
+	def get_news(self, qhash):
+		articles = self.db.get_reference_by_qhash(qhash)
 		datasets = []
 		for article in articles:
 			a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])

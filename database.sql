@@ -35,9 +35,9 @@ CREATE TABLE feedback_result (
 
 CREATE TABLE feedback_reference (
 `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-`article_hash` INT NOT NULL,
+`article_hash` TEXT NOT NULL,
 `reported_at` DATETIME NOT NULL,
-`is_relevant` BOOLEAN NOT NULL,
+`is_relevant` VARCHAR(20) NOT NULL,
 `reason` TEXT NOT NULL,
 `feedback_label` VARCHAR(20) NOT NULL,
 `client_ip` VARCHAR(50) NOT NULL,
