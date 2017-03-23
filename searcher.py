@@ -6,17 +6,25 @@ import hashlib
 import re
 import shutil
 import time
+import multiprocessing
+import uuid
 
 import requests
 import urlparse
 import urllib
 
-from multiprocessing import cpu_count
-from goose import Goose
-from google import search, get_page
+import gevent
+from gevent import monkey
+from gevent import Greenlet
 
-from pke import ProcessKillingExecutor
+start = time.time()
+
+from goose import Goose
+import google
+
 from article import Article
+from database import Database
+import config
 
 class Searcher:
 	basedir = "news"
@@ -30,110 +38,98 @@ class Searcher:
 
 		self.query_hash = hashlib.sha256(self.query).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
+		self.db = Database()
 
-	def _check_dir(self):
-		start_search = not os.path.exists(self.articledir)
+	def set_qid(self, qid):
+		self.qid = qid
 
-		if not start_search:
-			start_search = len(os.listdir(self.articledir)) < 5
-			if start_search:
-				shutil.rmtree(self.articledir, ignore_errors=True)
+	def _get_cache(self):
+		return self.db.get_reference_by_qhash(self.query_hash)
 
-		return start_search
+	def search_all(self):
+		cache = self._get_cache()
+		if not len(cache) > 5:
+			manager = multiprocessing.Manager()
+			datasets = manager.list()
+			searches = [self.google(), self.bing()]
+			mps = []
+			for s in searches:
+				go = multiprocessing.Process(target=self.search, args=(s, datasets,))
+				mps.append(go)
+				go.start()
+			for mp in mps:
+				mp.join()
+			pdatasets = [x for x in datasets]
+			return pdatasets
+		else:
+			datasets = []
+			for article in cache:
+				a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
+				datasets.append(a)
+			return datasets
 
-	def check_cache(self):
-		start_search = self._check_dir()
+	def search(self, searches, datasets):
+		mps = []
+		manager = multiprocessing.Manager()
+		articles = manager.list()
+		
+		for data in searches:
+			mp = multiprocessing.Process(name="Process for " + str(data["url"]), target=self.article_worker, args=(data, articles,))
+			mp.daemon = True
+			mps.append(mp)
+			mp.start()
+		
+		for mp in mps:
+			mp.join(10)
+			mp.is_alive()
+			time.sleep(.1)
 
-		if start_search:
-		 	os.makedirs(self.articledir)
-		 	return False
-		return True
+		self.db.insert_references(self.qid, articles)
+		for article in articles:
+			a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
+			datasets.append(a)
 
-	def search_google(self, start=0, check=True):
-		count = start
-		threads = []
-		data = []
-		for url in search(self.query, tld='com', lang='en', stop=10):
-			obj = {}
-			obj["url"] = url
-			obj["filename"] = str(count)
-			obj["extractor"] = Goose()
-			obj["date"] = None
-			data.append(obj)
-			count += 1
-		executor = ProcessKillingExecutor(max_workers=cpu_count())
-		generator = executor.map(self.__article_worker, data, timeout=35)
-		for elem in generator:
-			logging.info(elem)
-			print(elem)
-		    #None
-		print("Finish Data Gathering - Google")
-		logging.info("Finish Data Gathering - Google")
-		return count
+		print("Finish Data Gathering")
+		logging.info("Finish Data Gathering")
 
-	def search_bing(self, start=0, check=True):
-		count = start
-		threads = []
-		data = []
-		for url, date in self.__call_bing_api(self.query):
-			obj = {}
-			obj["url"] = url
-			obj["filename"] = str(count)
-			obj["extractor"] = Goose()
-			obj["date"] = date
-			data.append(obj)
-			count += 1
-		executor = ProcessKillingExecutor(max_workers=cpu_count())
-		generator = executor.map(self.__article_worker, data, timeout=35)
-		for elem in generator:
-			logging.info(elem)
-			print(elem)
-		    #None
-		print("Finish Data Gathering - Bing")
-		logging.info("Finish Data Gathering - Bing")
-		return count
-
-	def get_news(self):
+	def get_news(self, loghash):
+		articles = self.db.get_references_by_loghash(loghash)
 		datasets = []
-		for d in os.listdir(self.articledir):
-			if d.endswith(".txt"):
-				l, u, date = "", "", ""
-				name = d.split(".")
-				with open(self.articledir + '/' + d, "r") as file:
-					l = ''.join([x for x in file.read() if ord(x) < 128])
-				if len(l) > 0:				
-					with open(self.articledir + '/' + name[0] + ".meta", "r") as f:
-						i = 0
-						for a in f.readlines():
-							if i == 0: u = a.replace('\n','')
-							elif i == 1: date = a.replace('\n','')
-							i += 1			
-					article = Article(d, u, l, date)
-					datasets.append(article)
+		for article in articles:
+			a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
+			datasets.append(a)
 		return datasets
 
-	def __article_worker(self, data, *args, **kwargs):
-		extractor = data["extractor"]
+	def article_worker(self, data, articles):
 		filename = data["filename"]
 		url = data["url"]
 		date = data["date"]
 
+		jobs = [Greenlet.spawn(google.get_page, url)]
+		gevent.joinall(jobs)
+
+		html = jobs[0].value
+		
+		extractor =  Goose({'browser_user_agent': 'Mozilla', 'enable_image_fetching': False, 'http_timeout': 10})
 		if date == None:
-			date = articleDateExtractor.extractArticlePublishedDate(url)
+			date = articleDateExtractor.extractArticlePublishedDate(url, html)
 		if len(str(date)) < 10:
 			date = None
+		if len(str(date)) > 19:
+			date = str(date)[:19]
 
-		article = extractor.extract(raw_html=get_page(url))
+		article = extractor.extract(raw_html=html)
 		text = article.cleaned_text
 
 		l = ''.join([x for x in text if ord(x) < 128])
-		if len(l) > 0: 
-			with open(self.articledir + '/' + filename + '.txt', 'w') as file:
-				file.write(l)			
-			with open(self.articledir + '/' + filename + '.meta', 'w') as file:
-				file.write(str(url) + '\n')
-				file.write(str(date) + '\n')
-		return str(filename) + " OK"
+		if len(l) > 0:
+			article = {}
+			article["qhash"] = self.query_hash
+			article["hash"] = uuid.uuid4().hex
+			article["content"] = l
+			article["url"] = str(url)
+			article["date"] = str(date)
+			articles.append(article)
 
 	def __sanitize_bing_url(self, bing_url):
 		parsed_url = urlparse.urlparse(bing_url)
@@ -143,13 +139,36 @@ class Searcher:
 	def __sanitize_bing_date(self, bing_date):
 		return bing_date.replace('T', ' ')
 
-	def __call_bing_api(self, query):
-		url_query = urllib.quote_plus(query)
-		headers = {'Ocp-Apim-Subscription-Key': 'b1168966984e49eda59e502ee2b8fe94'}
+	def bing(self):
+		count = 0
+		url_query = urllib.quote_plus(self.query)
+		headers = {'Ocp-Apim-Subscription-Key': config.bing_api_credential}
 		r = requests.get('https://api.cognitive.microsoft.com/bing/v5.0/news/search?q='+ url_query +'&count=10&mkt=en-us', headers=headers)
 		data = []
 		results = r.json()
-		news = results["value"]
-		for article in news:
-			data.append((self.__sanitize_bing_url(article["url"]), self.__sanitize_bing_date(article["datePublished"])))
+		for article in results["value"]:
+			date = "1950-01-01 00:00:00+00:00"
+			if "datePublished" in article.keys():
+				date = article["datePublished"]
+			obj = {}
+			obj["url"] = self.__sanitize_bing_url(article["url"])
+			obj["filename"] = 'b' + str(count)
+			obj["date"] = self.__sanitize_bing_date(date)
+			data.append(obj)
+			count += 1
+			if (count > 10): break
+		return data
+
+	def google(self):
+		count = 0
+		data = []
+		query_exclusion = " -site:twitter.com -site:reddit.com -site:facebook.com -site:youtube.com -site:pinterest.com -site:amazon.com -site:wordpress.com -site:blogspot.com"
+		for url in google.search(self.query + query_exclusion, tld='com', lang='en', stop=10):
+			obj = {}
+			obj["url"] = url
+			obj["filename"] = 'g' + str(count)
+			obj["date"] = None
+			data.append(obj)
+			count += 1
+			if (count > 10): break
 		return data

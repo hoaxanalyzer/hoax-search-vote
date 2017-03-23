@@ -1,3 +1,7 @@
 /news/*
+/news_train/*
+/news_test/*
+/dataset/*
 /data/*
 *.pyc
+config.py

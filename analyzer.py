@@ -1,25 +1,35 @@
 import logging
+import uuid
 
 from sklearn.externals import joblib
 
 from similar import Similar
 from article import Article
 from searcher import Searcher
+from database import Database
 
 class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
-	def __init__(self, query):
+	def __init__(self, text, query, client=None, qhash=None):
+		self.text = text
 		self.query = query
+		self.qhash = qhash
+		
+		self.client = client
+		if not type(self.client) is dict:
+			self.client = {}
+
+		self.db = Database()
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
-		if (conclusion[2] > conclusion[1]):
+		if (conclusion[2] >= conclusion[1]):
 			if (conclusion[2] > (conclusion[1] + conclusion[3])): return 2
 			else:
 				if ((conclusion[1] + conclusion[3]) - conclusion[2] < THRESHOLD_UNKNOWN): return 2
 			 	else: return 3
-		elif (conclusion[2] <= conclusion[1]):
+		elif (conclusion[2] < conclusion[1]):
 			if ((conclusion[3] + conclusion[2]) < conclusion[1]): return 1
 			else:
 				if ((conclusion[3] + conclusion[2]) - conclusion[1] < THRESHOLD_UNKNOWN): return 1
@@ -45,16 +55,56 @@ class Analyzer:
 				selected.append(m)	
 		return selected
 
+	def generate_dataset(self):
+		dataset = []
+		query = self.query
+		print("Generate dataset for " + query)
+
+		s = Searcher(query)
+		if (not s.check_cache()) and (self.qhash == None):
+			s.search_all()
+		dataset = s.get_news(self.qhash)
+
+		sentences = []
+		for article in dataset:
+			sentences.append(article.content_clean)
+
+		similar = Similar(query, sentences)
+
+		i = 0
+		for num, result in similar.rank:
+		 	article = dataset[num]
+		 	article.set_similarity(result)
+			i += 1
+
+		thehash = s.query_hash
+		if self.qhash != None:
+			thehash = self.qhash
+
+		filename = "dataset/feature-" + thehash
+		with open(filename, 'w') as file:
+			for a in dataset:
+			 	featurescsv = ""
+			 	for fea in a.get_features_array():
+		 			featurescsv += ", " + str(fea)
+				file.write('"' + self.query + '", ' + thehash + ', ' + a.filename + str(featurescsv) + ', unlabeled\n')
+
 	def do(self):
 		dataset = []
 		query = self.query + ' hoax'
-		print("Search for " + query)
 
 		s = Searcher(query)
-		if not s.check_cache():
-			last = s.search_google(0, True)
-			s.search_bing(last, False)
-		dataset = s.get_news()
+
+		if not "ip" in self.client.keys():
+			self.client["ip"] = "unknown"
+		if not "browser" in self.client.keys():
+			self.client["browser"] = "unknown"
+
+		if self.qhash == None:
+			s.set_qid(self.db.insert_query_log(uuid.uuid4().hex, self.text, query, s.query_hash, self.client["ip"], self.client["browser"]))
+			dataset = s.search_all()
+		else:
+			dataset = s.get_news(self.qhash)
 		dataset = self.__calculate_weight(dataset)
 
 		sentences = []
@@ -63,18 +113,24 @@ class Analyzer:
 
 		similar = Similar(query, sentences)
 
-		dt = joblib.load('./models/model02-svm.pkl') 
+		clf = joblib.load('./models/model03-combined-mlp.pkl') 
 
 		i = 0
 		conclusion = [0] * 4
+		print(conclusion)
 		for num, result in similar.rank:
 		 	article = dataset[num]
 		 	article.set_similarity(result)
-			idx = dt.predict([article.get_features_array()])[0]
+			idx = clf.predict([article.get_features_array()])[0]
 			article.set_label(Analyzer.target[idx])
+			print("label: " + article.label)
+			print("idx label: " + str(idx))
 			conclusion[idx] += 1
 			if idx != 0: conclusion[idx] += article.weight
+			print(conclusion)
 			i += 1
+		print("Final")
+		print(conclusion)
 
 		ridx = self.__do_voting(conclusion)
 
@@ -95,6 +151,8 @@ class Analyzer:
 		result["scores"] = conclusion
 
 		result["references"] = lor
+
+		self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
 		return result
 
 

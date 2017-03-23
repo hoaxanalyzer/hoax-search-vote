@@ -36,11 +36,11 @@ def visualize_tree(tree, feature_names):
         exit("Could not run dot, ie graphviz, to "
              "produce visualization")
 
-df = get_data("../dataset-02-labeled.csv")
+df = get_data("../csv/dataset-03-combined-labeled.csv")
 df2, targets = encode_target(df, "label")
 
 print(targets)
-features = list(df2.columns[2:44])
+features = list(df2.columns[2:97])
 print("* features:", features, sep="\n")
 
 y = df2["target"]
@@ -57,5 +57,5 @@ dt.fit(X, y)
 
 #print(dt.predict_proba([[0.0, 0.0758883, 0.2195]]))
 
-joblib.dump(dt, 'model02-svm.pkl') 
+joblib.dump(dt, 'model03-combined-svm.pkl') 
 

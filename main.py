@@ -22,6 +22,10 @@ def index():
 
 @application.route("/analyze", methods=['POST'])
 def analyze():
+	client = {}
+	client['ip'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+	client['browser'] = request.headers.get('User-Agent')
+
 	query = request.json['query']
 	query = query.replace('\n', '')
 	
@@ -31,7 +35,7 @@ def analyze():
 	extracted_query = re.sub(r"(null_)\d", "", extracted_query)
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
-	analyzer = Analyzer(extracted_query)
+	analyzer = Analyzer(query, extracted_query, client)
 	result = json.dumps(analyzer.do())
 	return result
 
