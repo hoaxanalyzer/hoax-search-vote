@@ -1,8 +1,11 @@
+from future.standard_library import install_aliases
+install_aliases()
+
 import logging
 import pickle
 import re
+import urllib.parse
 from datetime import datetime
-from urlparse import urlparse
 from nltk.corpus import stopwords
 
 class Article:
@@ -141,7 +144,7 @@ class Article:
 		return ret
 
 	def _site_type(self, url):
-		parsed_uri = urlparse(url)
+		parsed_uri = urllib.parse.urlparse(url)
 		domain = '{uri.netloc}'.format(uri=parsed_uri)
 		ddomain = domain.split('.')
 

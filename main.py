@@ -4,6 +4,8 @@ import re
 
 from analyzer import Analyzer
 from feedback import Feedback
+from management import Management
+
 from information_ex import generate_query
 
 from flask import Flask
@@ -94,6 +96,24 @@ def feedback_reference():
 		result = json.dumps(feedback.reference(is_related, label, reason, auuid	))
 	except:
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	return result
+
+@application.route("/references/<qhash>", methods=['GET'])
+def get_references(qhash):
+	try:
+		management = Management()
+		result = json.dumps(management.get_references(qhash))
+	except:
+		result = json.dumps({"status": "Failed", "message": "Request error"})
+	return result
+
+@application.route("/logs/query", methods=['GET'])
+def get_log_query():
+	try:
+		management = Management()
+		result = json.dumps(management.get_query_log())
+	except:
+		result = json.dumps({"status": "Failed", "message": "Request error"})
 	return result
 
 @application.after_request

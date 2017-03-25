@@ -10,8 +10,7 @@ import multiprocessing
 import uuid
 
 import requests
-import urlparse
-import urllib
+import urllib.parse
 
 import gevent
 from gevent import monkey
@@ -31,6 +30,7 @@ class Searcher:
 	factgram = ["real", "official", "officially", "true", "truth"]
 
 	def __init__(self, query):
+		### TO-DO: QUERY?????
 		self.query = re.sub(r"[^\w\s]|_+", ' ', query.lower())
 
 		for w in Searcher.factgram:
@@ -133,8 +133,8 @@ class Searcher:
 			articles.append(article)
 
 	def __sanitize_bing_url(self, bing_url):
-		parsed_url = urlparse.urlparse(bing_url)
-		redirect_url = urlparse.parse_qs(parsed_url.query)['r']
+		parsed_url = urllib.parse.urlparse(bing_url)
+		redirect_url = urllib.parse.parse_qs(parsed_url.query)['r']
 		return redirect_url[0]
 
 	def __sanitize_bing_date(self, bing_date):
@@ -164,7 +164,7 @@ class Searcher:
 		count = 0
 		data = []
 		query_exclusion = " -site:twitter.com -site:reddit.com -site:facebook.com -site:youtube.com -site:pinterest.com -site:amazon.com -site:wordpress.com -site:blogspot.com"
-		for url in google.search(self.query + query_exclusion, tld='com', lang='en', stop=10):
+		for url in google.search(self.query, tld='com', lang='en', stop=10):
 			obj = {}
 			obj["url"] = url
 			obj["filename"] = 'g' + str(count)

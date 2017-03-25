@@ -52,9 +52,9 @@ class Database:
 	def insert_references(self, qid, articles):
 		insert_values = []
 		for article in articles:
-			insert_values.append((qid, str(article["qhash"]), str(article['hash']), str(article['date']), str(article['url']), '', article['content'], datetime.now())) 	
-		sql = "INSERT INTO article_reference (id_query, query_hash, article_hash, article_date, article_url, article_domain, article_content, retrieved_at) VALUES" + \
-				",".join("(%s, %s, %s, %s, %s, %s, %s, %s)" for _ in insert_values)
+			insert_values.append((qid, str(article["qhash"]), str(article['hash']), str(article['date']), str(article['url']), article['content'], datetime.now())) 	
+		sql = "INSERT INTO article_reference (id_query, query_hash, article_hash, article_date, article_url, article_content, retrieved_at) VALUES" + \
+				",".join("(%s, %s, %s, %s, %s, %s, %s)" for _ in insert_values)
 		flattened_values = [item for sublist in insert_values for item in sublist]		
 		self.cur.execute(sql, flattened_values)
 		self.conn.commit()
@@ -78,6 +78,24 @@ class Database:
 		query = self.cur.fetchone()
 		return query
 
+	def get_query_log(self):
+		sql = "SELECT * FROM log_query ORDER BY query_time DESC"
+		self.cur.execute(sql)
+		self.conn.commit()
+		queries = []
+		for row in self.cur.fetchall():
+			query = {}
+			query["log_hash"] = row[1]
+			query["query_text"] = row[2]
+			query["query_search"] = row[3]
+			query["query_hash"] = row[4]
+			query["query_time"] = str(row[5])
+			query["client_ip"] = row[6]
+			query["client_browser"] = row[7]
+			query["clicked"] = row[8]
+			queries.append(query)
+		return queries
+
 	def get_reference_by_qhash(self, qhash):
 		sql = "SELECT * FROM article_reference WHERE query_hash = '%s'" % (qhash)
 		self.cur.execute(sql)
@@ -89,9 +107,39 @@ class Database:
 				article["hash"] = row[3]
 				article["date"] = row[4]
 				article["url"] = row[5]
-				article["content"] = row[7]
+				article["content"] = row[6]
 				articles.append(article)
 		return articles
+
+	def get_reference_feedback(self):
+		## VIWEW HELPER #1
+		sql = "CREATE OR REPLACE VIEW feedback_reference_result AS SELECT article_hash, is_relevant, feedback_label, COUNT(*) AS count FROM feedback_reference GROUP BY article_hash, is_relevant, feedback_label"
+		self.cur.execute(sql)
+		self.conn.commit()
+
+		## VIWEW HELPER #2
+		sql = "CREATE OR REPLACE VIEW feedback_reference_max AS (SELECT article_hash, is_relevant, feedback_label, count FROM feedback_reference_result WHERE count = (SELECT MAX(count) FROM feedback_reference_result i WHERE i.article_hash = feedback_reference_result.article_hash))"
+		self.cur.execute(sql)
+		self.conn.commit()
+
+		## THE QUERY
+		sql = "SELECT log_query.id, log_query.query_text, log_query.query_search, article_reference.article_content, feedback_reference_max.is_relevant, feedback_reference_max.feedback_label FROM feedback_reference_max LEFT JOIN article_reference ON article_reference.article_hash = feedback_reference_max.article_hash LEFT JOIN log_query ON log_query.id = article_reference.id_query"
+		self.cur.execute(sql)
+		self.conn.commit()
+
+		feedbacks = {}
+		for row in self.cur.fetchall():
+			feedback = {}
+			feedback["query_text"] = row[1]
+			feedback["query_search"] = row[2]
+			feedback["article_content"] = row[3]
+			feedback["is_relevant"] = row[4]
+			feedback["feedback_label"] = row[5]
+			#feedbacks.append(feedback)
+			if not (row[0] in feedbacks):
+				feedbacks[row[0]] = []
+			feedbacks[row[0]].append(feedback)
+		return feedbacks
 
 	def check_query(self, qhash): 	
 		sql = "INSERT INTO log_query (query_text, query_search, query_hash, query_time, client_ip, client_browser) VALUES" + \

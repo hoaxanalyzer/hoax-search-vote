@@ -30,12 +30,12 @@ class Analyzer:
 			if (conclusion[2] > (conclusion[1] + conclusion[3])): return 2
 			else:
 				if ((conclusion[1] + conclusion[3]) - conclusion[2] < THRESHOLD_UNKNOWN): return 2
-			 	else: return 3
+				else: return 3
 		elif (conclusion[2] < conclusion[1]):
 			if ((conclusion[3] + conclusion[2]) < conclusion[1]): return 1
 			else:
 				if ((conclusion[3] + conclusion[2]) - conclusion[1] < THRESHOLD_UNKNOWN): return 1
-			 	else: return 3
+				else: return 3
 		else: return 3
 
 	def __calculate_weight(self, dataset):
@@ -64,14 +64,16 @@ class Analyzer:
 		for article in dataset:
 			sentences.append(article.content_clean)
 
-		similar = Similar(self._get_query_hoax(), sentences)
-		clf = joblib.load('./models/model03-combined-mlp.pkl') 
+		# ATTETION HERE! CHANGE THE QUERY TO TEXT
+		#similar = Similar(self._get_query_hoax(), sentences)
+		similar = Similar(self.text, sentences)
+		clf = joblib.load('./models/generated_model.pkl') 
 		i = 0
 		conclusion = [0] * 4
 
 		for num, result in similar.rank:
-		 	article = dataset[num]
-		 	article.set_similarity(result)
+			article = dataset[num]
+			article.set_similarity(result)
 			idx = clf.predict([article.get_features_array()])[0]
 			article.set_label(Analyzer.target[idx])
 			conclusion[idx] += 1
