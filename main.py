@@ -2,9 +2,9 @@ import logging
 import json
 import re
 
-from analyzer import Analyzer
-from feedback import Feedback
-from management import Management
+from core import Analyzer
+from core import Feedback
+from core import Management
 
 from information_ex import generate_query
 

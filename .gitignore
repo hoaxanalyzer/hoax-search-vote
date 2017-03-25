@@ -1,3 +1,4 @@
+/hoaxa/*
 /news/*
 /news_train/*
 /news_test/*
@@ -5,3 +6,4 @@
 /data/*
 *.pyc
 config.py
+requirements.txt

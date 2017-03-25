@@ -1,11 +1,14 @@
 import logging
+
+## ANALYZER
 import uuid
 
 from sklearn.externals import joblib
 
-from similar import Similar
+from helper import Similar
+from helper import Searcher
+
 from article import Article
-from searcher import Searcher
 from database import Database
 
 class Analyzer:
@@ -158,4 +161,72 @@ class Analyzer:
 		result["id"] = query_uuid
 
 		self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
+		return result
+
+class Feedback:
+	def __init__(self, client=None):
+		self.client = client
+		if not type(self.client) is dict:
+			self.client = {}
+		self.db = Database()
+	
+	def result(self, is_know, label, reason, quuid):
+		result = {}
+		try:
+			if self.db.is_query_exist(quuid):
+				self.db.insert_result_feedback(quuid, is_know, reason, label, self.client["ip"], self.client["browser"])
+				result["status"] = "Success"
+				result["message"] = "Result feedback noted"
+			else:
+				result["status"] = "Failed"
+				result["message"] = "Invalid quuid"				
+		except Exception, e:
+			result["status"] = "Failed"
+			result["message"] = "Database error"
+			result["detail"] = str(e)
+		return result
+
+	def reference(self, is_related, label, reason, auuid):
+		result = {}
+		try:
+			if self.db.is_reference_exist(auuid):
+				self.db.insert_reference_feedback(auuid, is_related, reason, label, self.client["ip"], self.client["browser"])
+				result["status"] = "Success"
+				result["message"] = "Reference feedback noted"
+			else:
+				result["status"] = "Failed"
+				result["message"] = "Invalid auuid"		
+		except Exception, e:
+			result["status"] = "Failed"
+			result["message"] = "Database error"
+			result["detail"] = str(e)
+		return result
+
+class Management:
+	def __init__(self, client=None):
+		self.client = client
+		if not type(self.client) is dict:
+			self.client = {}
+		self.db = Database()
+	
+	def get_references(self, qhash):
+		result = {}
+		try:
+			result["status"] = "Success"
+			result["data"] = self.db.get_reference_by_qhash(qhash)
+		except Exception, e:
+			result["status"] = "Failed"
+			result["message"] = "Database error"
+			result["detail"] = str(e)
+		return result
+
+	def get_query_log(self):
+		result = {}
+		try:
+			result["status"] = "Success"
+			result["data"] = self.db.get_query_log()
+		except Exception, e:
+			result["status"] = "Failed"
+			result["message"] = "Database error"
+			result["detail"] = str(e)
 		return result

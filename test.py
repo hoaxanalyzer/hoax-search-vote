@@ -217,10 +217,14 @@ specific = ["Weapons-wielding clowns from the U.S. invaded Canada and murdered 2
 # result = analyzer.do()
 # print result["conclusion"]
 
-analyzer = Analyzer("", specific[0])
+query = "Weapons-wielding clowns from the U.S. invaded Canada and murdered 23 victim"
+query2 = "iphone 7 with no jack"
+
+analyzer = Analyzer(query2, query2)
 result = analyzer.do()
 print(result["scores"])
 print(result["conclusion"])
+print(result["references"])
 # http://stackoverflow.com/questions/38076220/python-mysqldb-connection-in-a-class
 
 ### DATASET CREATOR ###
