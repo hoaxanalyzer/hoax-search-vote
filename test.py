@@ -225,8 +225,9 @@ query4 = "jackie chan dead"
 query5 = "steve jobs dead"
 indoquery = "Bandung kota di prediksi Bakal Kacau, Besok Di sinyalir ada Dua Kubu besar, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
 lala = "flat earth"
+bush = "WASHINGTON—George W. Bush, 43rd president of the United States of America, passed away painlessly in his sleep Monday night"
 
-analyzer = Analyzer(indoquery, indoquery)
+analyzer = Analyzer(query4, query4)
 result = analyzer.do()
 print(result["scores"])
 print(result["conclusion"])

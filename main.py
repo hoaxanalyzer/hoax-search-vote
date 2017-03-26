@@ -1,6 +1,8 @@
 import logging
 import json
 import re
+import itertools
+import time
 
 from core import Analyzer
 from core import Feedback
@@ -8,7 +10,7 @@ from core import Management
 
 #from information_ex import generate_query
 
-from flask import Flask
+from flask import Flask, Response
 from flask import request
 from flask_cors import CORS, cross_origin
 
@@ -51,6 +53,28 @@ def analyze():
 		extracted_query = extracted_query.lower()
 		analyzer = Analyzer(query, extracted_query, client)
 		result = json.dumps(analyzer.do())
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
+	return result
+
+@application.route("/analyze/stream", methods=['POST'])
+def analyze_stream():
+	try:
+		if request.headers.get('accept') == 'text/event-stream':
+			client = detect_client()
+			query = request.json['query']
+			query = query.replace('\n', '')
+			
+			logging.info("Getting query: " + query)
+
+			extracted_query = query
+			#extracted_query = generate_query(query)
+			#extracted_query = re.sub(r"(null_)\d", "", extracted_query)
+			extracted_query = extracted_query.strip()
+			extracted_query = extracted_query.lower()
+			analyzer = Analyzer(query, extracted_query, client)
+
+			return Response(analyzer.do_stream(), content_type='text/event-stream')
 	except Exception as e:
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
@@ -125,4 +149,4 @@ def after_request(response):
 	return response
 
 if __name__ == "__main__":
-    application.run(host="0.0.0.0", port=8080)
+	application.run(host="0.0.0.0", port=8080)
