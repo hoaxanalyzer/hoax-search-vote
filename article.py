@@ -232,8 +232,9 @@ class Article:
 		domain = clean_domain[:-1]
 		self.url_base = domain
 
+		## Make more punishing for non-credible sites
 		if domain in Article.sitedata:
 			if Article.sitedata[domain] == 'credible': return 2
-			else: return 0
-		else: return 1
+			else: return -1
+		else: return 0
 

@@ -17,7 +17,7 @@ class Analyzer:
 	def __init__(self, text, query, client=None):
 		self.text = text
 		self.query = query
-		
+	
 		self.client = client
 		if not type(self.client) is dict:
 			self.client = {}
@@ -150,6 +150,7 @@ class Analyzer:
 			data["label"] = r.label
 			#data["text"] = r.content
 			data["id"] = r.ahash
+			data["site_score"] = r.url_score
 			lor.append(data)
 
 		result = {}

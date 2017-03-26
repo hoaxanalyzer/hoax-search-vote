@@ -223,7 +223,8 @@ query2 = "earth is flat"
 query3 = "alan rickman dead"
 query4 = "jackie chan dead"
 query5 = "steve jobs dead"
-indoquery = "hari ini Bandung kota di prediksi Bakal Kacau,, Besok Di sinyalir ada Dua Kubu besar,, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
+indoquery = "Bandung kota di prediksi Bakal Kacau, Besok Di sinyalir ada Dua Kubu besar, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
+lala = "flat earth"
 
 analyzer = Analyzer(indoquery, indoquery)
 result = analyzer.do()

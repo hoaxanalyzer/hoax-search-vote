@@ -7,7 +7,6 @@ from gensim import corpora, models, similarities
 from nltk.corpus import stopwords
 
 ## SEARCHER
-#import articleDateExtractor
 import os
 import hashlib
 import re
@@ -22,10 +21,12 @@ import gevent
 from gevent import monkey
 from gevent import Greenlet
 
+from GoogleScraper import scrape_with_config, GoogleSearchError
+
 start = time.time()
 
 #from goose import Goose
-import google
+#import google
 
 from newspaper import Article as News
 from article import Article
@@ -44,6 +45,11 @@ class Searcher:
 		for w in Searcher.factgram:
 			self.query = self.query.replace(w, ' ')
 
+		## Only get max 100 character
+		self.query = self.query[:100]
+
+		self.query_exc = ' -youtube -wikipedia -amazon -wordpress -blogspot -facebook -twitter -pinterest -google'
+
 		self.query_hash = hashlib.sha256((self.query).encode('utf-8')).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
 		self.db = Database()
@@ -57,10 +63,38 @@ class Searcher:
 
 	def search_all(self):
 		cache = self._get_cache()
-		if not len(cache) > 5:
+		if not len(cache) > 10:
+			if len(cache) != 0:
+				self.db.del_reference_by_qhash(self.query_hash)
+
+			keyword = self.query + self.query_exc
+
+			config = {
+				'use_own_ip': True,
+				'keyword': keyword,
+				'search_engines': ['google', 'bing', 'duckduckgo'],
+				'num_pages_for_keyword': 1,
+				'num_results_per_page': 10,
+				'scrape_method': 'selenium'
+			}
+
+			try:
+				search = scrape_with_config(config)
+			except GoogleSearchError as e:
+				print(e)
+
+			searches = []
+			for serp in search.serps:
+				se = []
+				count = 0
+				for link in serp.links:
+					if link.link_type == "results" and count < 10:
+						se.append(link.link)
+						count += 1
+				searches.append(se)
+
 			manager = multiprocessing.Manager()
 			datasets = manager.list()
-			searches = [self.google(), self.bing()]
 			mps = []
 			for s in searches:
 				go = multiprocessing.Process(target=self.search, args=(s, datasets,))
@@ -81,9 +115,9 @@ class Searcher:
 		mps = []
 		manager = multiprocessing.Manager()
 		articles = manager.list()
-		
-		for data in searches:
-			mp = multiprocessing.Process(name="Process for " + str(data["url"]), target=self.article_worker, args=(data, articles,))
+
+		for url in searches:
+			mp = multiprocessing.Process(name="Process for " + str(url), target=self.article_worker, args=(url, articles,))
 			mp.daemon = True
 			mps.append(mp)
 			mp.start()
@@ -109,11 +143,7 @@ class Searcher:
 			datasets.append(a)
 		return datasets
 
-	def article_worker(self, data, articles):
-		filename = data["filename"]
-		url = data["url"]
-		date = data["date"]
-
+	def article_worker(self, url, articles):
 		jobs = [Greenlet.spawn(self.__gevent_worker, url, 'en')]
 		gevent.joinall(jobs)
 
@@ -133,20 +163,12 @@ class Searcher:
 			date = news.publish_date
 			text = news.text
 
-		# extractor =  Goose({'browser_user_agent': 'Mozilla', 'enable_image_fetching': False, 'http_timeout': 10})
-		# if date == None:
-		# 	date = articleDateExtractor.extractArticlePublishedDate(url, html)
 		if len(str(date)) < 10:
 			date = None
 		if len(str(date)) > 19:
 			date = str(date)[:19]
 
-		# article = extractor.extract(raw_html=html)
-		# text = article.cleaned_text
-
 		l = ''.join([x for x in text if ord(x) < 128])
-		# print("Finished getting: " + url)
-		# print("[[" + url + "]]" + str(l))
 		if len(l) > 0:
 			article = {}
 			article["qhash"] = self.query_hash
@@ -168,57 +190,23 @@ class Searcher:
 	def __sanitize_bing_date(self, bing_date):
 		return bing_date.replace('T', ' ')
 
-	def bing(self):
-		count = 0
-		url_query = urllib.parse.quote_plus(self.query)
-		headers = {'Ocp-Apim-Subscription-Key': config.bing_api_credential}
-		r = requests.get('https://api.cognitive.microsoft.com/bing/v5.0/news/search?q='+ url_query +'&count=10&mkt=en-us', headers=headers)
-		data = []
-		results = r.json()
-		for article in results["value"]:
-			date = "1950-01-01 00:00:00+00:00"
-			if "datePublished" in list(article.keys()):
-				date = article["datePublished"]
-			obj = {}
-			obj["url"] = self.__sanitize_bing_url(article["url"])
-			obj["filename"] = 'b' + str(count)
-			obj["date"] = self.__sanitize_bing_date(date)
-			data.append(obj)
-			count += 1
-			if (count > 10): break
-		return data
-
-	def google(self):
-		count = 0
-		data = []
-		query_exclusion = " -site:twitter.com -site:youtube.com -site:pinterest.com -site:amazon.com"
-		for url in google.search(self.query + query_exclusion, tld='com', lang='en', stop=10):
-			obj = {}
-			obj["url"] = url
-			obj["filename"] = 'g' + str(count)
-			obj["date"] = None
-			data.append(obj)
-			count += 1
-			if (count > 10): break
-		return data
-
 class Similar:
 	def __init__(self, sentence, paragraph):
-	    self.sentence = sentence
-	    self.paragraph = paragraph
-	    self.similarity_of(sentence, paragraph)
+		self.sentence = sentence
+		self.paragraph = paragraph
+		self.similarity_of(sentence, paragraph)
 
 	def create_dic(self, documents):	
 		texts = [[word for word in document.lower().split() if word not in stopwords.words('english')]
-		         for document in documents]
+				 for document in documents]
 
 		from collections import defaultdict
 		frequency = defaultdict(int)
 		for text in texts:
-		    for token in text:
-		        frequency[token] += 1
+			for token in text:
+				frequency[token] += 1
 		texts = [[token for token in text if frequency[token] > 1]
-		         for text in texts]
+				 for text in texts]
 
 		dictionary = corpora.Dictionary(texts)
 		corpus = [dictionary.doc2bow(text) for text in texts]

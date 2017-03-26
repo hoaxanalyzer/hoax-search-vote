@@ -3,13 +3,13 @@ numpy
 scipy
 gensim
 nltk
-dateutil
 beautifulsoup4
 gevent
 newspaper3k
 future
 pymysql
 pandas
-google
+GoogleScraper
 flask
 flask_cors
+gunicorn
