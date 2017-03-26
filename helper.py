@@ -45,7 +45,7 @@ class Searcher:
 		for w in Searcher.factgram:
 			self.query = self.query.replace(w, ' ')
 
-		self.query = self.query[:]
+		self.query = self.query[:100]
 
 		self.query_hash = hashlib.sha256((self.query).encode('utf-8')).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
