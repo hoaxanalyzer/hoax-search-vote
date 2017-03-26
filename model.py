@@ -8,7 +8,7 @@ from sklearn import svm
 
 import pickle
 
-from similar import Similar
+from core import Similar
 from article import Article
 from database import Database
 

@@ -25,7 +25,8 @@ class Analyzer:
 		self.db = Database()
 	
 	def _get_query_hoax(self):
-		return self.query + ' hoax'
+		## TRying not using + Hoax query, maybe better?
+		return self.query + ''
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
@@ -56,7 +57,7 @@ class Analyzer:
 			if m.label == label:
 				selected.append(m)	
 		for m in meta:
-			if m.label != label and m.label != 'unrelated':
+			if m.label != label:
 				selected.append(m)	
 		return selected
 
@@ -87,10 +88,10 @@ class Analyzer:
 	def retrieve(self, loghash):
 		query = self.db.get_query_by_loghash(loghash)
 		if not query == None:
-			self.query = query[3]
+			self.query = query["query_search"]
 
 			s = Searcher("this is not query")
-			dataset = s.get_news(query[4])
+			dataset = s.get_news(query["query_hash"])
 
 			conclusion = self._get_conclusion(dataset)
 			ridx = self.__do_voting(conclusion)
@@ -107,8 +108,8 @@ class Analyzer:
 				lor.append(data)
 
 			result = {}
-			result["inputText"] = query[2]
-			result["hash"] = query[4]
+			result["inputText"] = query["query_text"]
+			result["hash"] = query["query_hash"]
 			result["conclusion"] = Analyzer.target[ridx]
 			result["scores"] = conclusion
 			result["references"] = lor
@@ -128,9 +129,9 @@ class Analyzer:
 
 		s = Searcher(self._get_query_hoax())
 
-		if not "ip" in self.client.keys():
+		if not "ip" in list(self.client.keys()):
 			self.client["ip"] = "unknown"
-		if not "browser" in self.client.keys():
+		if not "browser" in list(self.client.keys()):
 			self.client["browser"] = "unknown"
 
 		query_uuid = uuid.uuid4().hex
@@ -147,7 +148,7 @@ class Analyzer:
 			data["url"] = r.url
 			data["url_base"] = r.url_base
 			data["label"] = r.label
-			data["text"] = r.content
+			#data["text"] = r.content
 			data["id"] = r.ahash
 			lor.append(data)
 
@@ -180,7 +181,7 @@ class Feedback:
 			else:
 				result["status"] = "Failed"
 				result["message"] = "Invalid quuid"				
-		except Exception, e:
+		except Exception as e:
 			result["status"] = "Failed"
 			result["message"] = "Database error"
 			result["detail"] = str(e)
@@ -196,7 +197,7 @@ class Feedback:
 			else:
 				result["status"] = "Failed"
 				result["message"] = "Invalid auuid"		
-		except Exception, e:
+		except Exception as e:
 			result["status"] = "Failed"
 			result["message"] = "Database error"
 			result["detail"] = str(e)
@@ -214,7 +215,7 @@ class Management:
 		try:
 			result["status"] = "Success"
 			result["data"] = self.db.get_reference_by_qhash(qhash)
-		except Exception, e:
+		except Exception as e:
 			result["status"] = "Failed"
 			result["message"] = "Database error"
 			result["detail"] = str(e)
@@ -225,7 +226,7 @@ class Management:
 		try:
 			result["status"] = "Success"
 			result["data"] = self.db.get_query_log()
-		except Exception, e:
+		except Exception as e:
 			result["status"] = "Failed"
 			result["message"] = "Database error"
 			result["detail"] = str(e)

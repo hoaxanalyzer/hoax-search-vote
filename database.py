@@ -1,15 +1,16 @@
-import mysql.connector
+import pymysql.cursors
 from datetime import date, datetime
 import json
 import config
 
 class Database:
 	def __init__(self):
-		self.conn = mysql.connector.connect(user=config.mysql_credentials["user"], \
-																				password=config.mysql_credentials["password"], \
-																				host=config.mysql_credentials["host"], \
-																				database=config.mysql_credentials["database"])
-		self.cur = self.conn.cursor(buffered=True)
+		self.conn = pymysql.connect(user=config.mysql_credentials["user"], \
+									password=config.mysql_credentials["password"], \
+									host=config.mysql_credentials["host"], \
+									db=config.mysql_credentials["database"],
+									cursorclass=pymysql.cursors.DictCursor)
+		self.cur = self.conn.cursor()
 
 	def __enter__(self):
 		return DBase()
@@ -20,8 +21,8 @@ class Database:
 			self.conn.close()
 
 	def insert_query_log(self, lhash, text, search, qhash, ip, browser): 	
-		sql = "INSERT INTO log_query (log_hash, query_text, query_search, query_hash, query_time, client_ip, client_browser) VALUES" + \
-					"({}, {}, {}, '{}', '{}', '{}', {})".format(json.dumps(lhash), json.dumps(text), json.dumps(search), qhash, datetime.now(), ip, json.dumps(browser))
+		sql = "INSERT INTO log_query (log_hash, query_text, query_search, query_hash, query_time, client_ip, client_browser, clicked) VALUES" + \
+					"({}, {}, {}, '{}', '{}', '{}', {}, {})".format(json.dumps(lhash), json.dumps(text), json.dumps(search), qhash, datetime.now(), ip, json.dumps(browser), 0)
 		self.cur.execute(sql)
 		self.conn.commit()
 		return self.cur.lastrowid
@@ -55,7 +56,7 @@ class Database:
 			insert_values.append((qid, str(article["qhash"]), str(article['hash']), str(article['date']), str(article['url']), article['content'], datetime.now())) 	
 		sql = "INSERT INTO article_reference (id_query, query_hash, article_hash, article_date, article_url, article_content, retrieved_at) VALUES" + \
 				",".join("(%s, %s, %s, %s, %s, %s, %s)" for _ in insert_values)
-		flattened_values = [item for sublist in insert_values for item in sublist]		
+		flattened_values = [item for sublist in insert_values for item in sublist]
 		self.cur.execute(sql, flattened_values)
 		self.conn.commit()
 
@@ -72,7 +73,7 @@ class Database:
 		return (self.cur.rowcount == 1)
 
 	def get_query_by_loghash(self, loghash):
-		sql = "SELECT * FROM log_query WHERE log_hash = '%s'" % (loghash)
+		sql = "SELECT * FROM log_query WHERE log_hash = '%s' LIMIT 1" % (loghash)
 		self.cur.execute(sql)
 		self.conn.commit()
 		query = self.cur.fetchone()
@@ -85,14 +86,14 @@ class Database:
 		queries = []
 		for row in self.cur.fetchall():
 			query = {}
-			query["log_hash"] = row[1]
-			query["query_text"] = row[2]
-			query["query_search"] = row[3]
-			query["query_hash"] = row[4]
-			query["query_time"] = str(row[5])
-			query["client_ip"] = row[6]
-			query["client_browser"] = row[7]
-			query["clicked"] = row[8]
+			query["log_hash"] = row["log_hash"]
+			query["query_text"] = row["query_text"]
+			query["query_search"] = row["query_search"]
+			query["query_hash"] = row["query_hash"]
+			query["query_time"] = str(row["query_time"])
+			query["client_ip"] = row["client_ip"]
+			query["client_browser"] = row["client_browser"]
+			query["clicked"] = row["clicked"]
 			queries.append(query)
 		return queries
 
@@ -104,10 +105,10 @@ class Database:
 		if (self.cur.rowcount > 0):
 			for row in self.cur.fetchall():
 				article = {}
-				article["hash"] = row[3]
-				article["date"] = row[4]
-				article["url"] = row[5]
-				article["content"] = row[6]
+				article["hash"] = row["article_hash"]
+				article["date"] = row["article_date"]
+				article["url"] = row["article_url"]
+				article["content"] = row["article_content"]
 				articles.append(article)
 		return articles
 
@@ -130,15 +131,15 @@ class Database:
 		feedbacks = {}
 		for row in self.cur.fetchall():
 			feedback = {}
-			feedback["query_text"] = row[1]
-			feedback["query_search"] = row[2]
-			feedback["article_content"] = row[3]
-			feedback["is_relevant"] = row[4]
-			feedback["feedback_label"] = row[5]
+			feedback["query_text"] = row["query_text"]
+			feedback["query_search"] = row["query_search"]
+			feedback["article_content"] = row["article_content"]
+			feedback["is_relevant"] = row["is_relevant"]
+			feedback["feedback_label"] = row["feedback_label"]
 			#feedbacks.append(feedback)
-			if not (row[0] in feedbacks):
-				feedbacks[row[0]] = []
-			feedbacks[row[0]].append(feedback)
+			if not (row["id"] in feedbacks):
+				feedbacks[row["id"]] = []
+			feedbacks[row["id"]].append(feedback)
 		return feedbacks
 
 	def check_query(self, qhash): 	

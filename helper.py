@@ -7,7 +7,7 @@ from gensim import corpora, models, similarities
 from nltk.corpus import stopwords
 
 ## SEARCHER
-import articleDateExtractor
+#import articleDateExtractor
 import os
 import hashlib
 import re
@@ -24,9 +24,10 @@ from gevent import Greenlet
 
 start = time.time()
 
-from goose import Goose
+#from goose import Goose
 import google
 
+from newspaper import Article as News
 from article import Article
 from database import Database
 
@@ -43,7 +44,7 @@ class Searcher:
 		for w in Searcher.factgram:
 			self.query = self.query.replace(w, ' ')
 
-		self.query_hash = hashlib.sha256(self.query).hexdigest()
+		self.query_hash = hashlib.sha256((self.query).encode('utf-8')).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
 		self.db = Database()
 		self.qid = -1
@@ -113,23 +114,39 @@ class Searcher:
 		url = data["url"]
 		date = data["date"]
 
-		jobs = [Greenlet.spawn(google.get_page, url)]
+		jobs = [Greenlet.spawn(self.__gevent_worker, url, 'en')]
 		gevent.joinall(jobs)
 
-		html = jobs[0].value
-		
-		extractor =  Goose({'browser_user_agent': 'Mozilla', 'enable_image_fetching': False, 'http_timeout': 10})
-		if date == None:
-			date = articleDateExtractor.extractArticlePublishedDate(url, html)
+		news = jobs[0].value
+		news.download()
+		news.parse()
+		date = news.publish_date
+		text = news.text
+
+		if len(text) < 100:
+			jobs = [Greenlet.spawn(self.__gevent_worker, url, 'id')]
+			gevent.joinall(jobs)
+
+			news = jobs[0].value
+			news.download()
+			news.parse()
+			date = news.publish_date
+			text = news.text
+
+		# extractor =  Goose({'browser_user_agent': 'Mozilla', 'enable_image_fetching': False, 'http_timeout': 10})
+		# if date == None:
+		# 	date = articleDateExtractor.extractArticlePublishedDate(url, html)
 		if len(str(date)) < 10:
 			date = None
 		if len(str(date)) > 19:
 			date = str(date)[:19]
 
-		article = extractor.extract(raw_html=html)
-		text = article.cleaned_text
+		# article = extractor.extract(raw_html=html)
+		# text = article.cleaned_text
 
 		l = ''.join([x for x in text if ord(x) < 128])
+		# print("Finished getting: " + url)
+		# print("[[" + url + "]]" + str(l))
 		if len(l) > 0:
 			article = {}
 			article["qhash"] = self.query_hash
@@ -138,6 +155,10 @@ class Searcher:
 			article["url"] = str(url)
 			article["date"] = str(date)
 			articles.append(article)
+
+	def __gevent_worker(self, url, lang):
+		article = News(url, language=lang)
+		return article
 
 	def __sanitize_bing_url(self, bing_url):
 		parsed_url = urllib.parse.urlparse(bing_url)
@@ -149,14 +170,14 @@ class Searcher:
 
 	def bing(self):
 		count = 0
-		url_query = urllib.quote_plus(self.query)
+		url_query = urllib.parse.quote_plus(self.query)
 		headers = {'Ocp-Apim-Subscription-Key': config.bing_api_credential}
 		r = requests.get('https://api.cognitive.microsoft.com/bing/v5.0/news/search?q='+ url_query +'&count=10&mkt=en-us', headers=headers)
 		data = []
 		results = r.json()
 		for article in results["value"]:
 			date = "1950-01-01 00:00:00+00:00"
-			if "datePublished" in article.keys():
+			if "datePublished" in list(article.keys()):
 				date = article["datePublished"]
 			obj = {}
 			obj["url"] = self.__sanitize_bing_url(article["url"])

@@ -6,7 +6,7 @@ from core import Analyzer
 from core import Feedback
 from core import Management
 
-from information_ex import generate_query
+#from information_ex import generate_query
 
 from flask import Flask
 from flask import request
@@ -44,14 +44,15 @@ def analyze():
 		
 		logging.info("Getting query: " + query)
 
-		extracted_query = generate_query(query)
-		extracted_query = re.sub(r"(null_)\d", "", extracted_query)
+		extracted_query = query
+		#extracted_query = generate_query(query)
+		#extracted_query = re.sub(r"(null_)\d", "", extracted_query)
 		extracted_query = extracted_query.strip()
 		extracted_query = extracted_query.lower()
 		analyzer = Analyzer(query, extracted_query, client)
 		result = json.dumps(analyzer.do())
-	except:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/result", methods=['POST'])
@@ -62,8 +63,8 @@ def result():
 		
 		analyzer = Analyzer("", "", client)
 		result = json.dumps(analyzer.retrieve(quuid))
-	except:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/feedback/result", methods=['POST'])
@@ -78,8 +79,8 @@ def feedback_result():
 		
 		feedback = Feedback(client)
 		result = json.dumps(feedback.result(is_know, label, reason, quuid))
-	except:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/feedback/reference", methods=['POST'])
@@ -94,8 +95,8 @@ def feedback_reference():
 		
 		feedback = Feedback(client)
 		result = json.dumps(feedback.reference(is_related, label, reason, auuid	))
-	except:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters"})
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/references/<qhash>", methods=['GET'])

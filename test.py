@@ -1,7 +1,7 @@
 import logging
 import json
 
-from analyzer import Analyzer
+from core import Analyzer
 from article import Article
 
 # for query in queries:
@@ -204,10 +204,11 @@ testqueries = ["Free Cone Day from Daily Queen Holding",
 "Actor Anthony Hopkins has died"]
 
 # for query in testqueries:
-# 	analyzer = Analyzer("", query)
+# 	#print(query)
+# 	analyzer = Analyzer(query, query)
 # 	result = analyzer.do()
 # 	print result["conclusion"]
-	#print result["scores"]
+# 	#print result["scores"]
 
 
 ### TEST ONLY ONE QUERY with SPECIFIC HASH ###
@@ -218,9 +219,13 @@ specific = ["Weapons-wielding clowns from the U.S. invaded Canada and murdered 2
 # print result["conclusion"]
 
 query = "Weapons-wielding clowns from the U.S. invaded Canada and murdered 23 victim"
-query2 = "iphone 7 with no jack"
+query2 = "earth is flat"
+query3 = "alan rickman dead"
+query4 = "jackie chan dead"
+query5 = "steve jobs dead"
+indoquery = "hari ini Bandung kota di prediksi Bakal Kacau,, Besok Di sinyalir ada Dua Kubu besar,, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
 
-analyzer = Analyzer(query2, query2)
+analyzer = Analyzer(indoquery, indoquery)
 result = analyzer.do()
 print(result["scores"])
 print(result["conclusion"])
