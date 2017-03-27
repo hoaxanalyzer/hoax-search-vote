@@ -17,13 +17,13 @@ from flask import request, abort
 from flask_cors import CORS, cross_origin
 
 from linebot import (
-    LineBotApi, WebhookParser
+	LineBotApi, WebhookParser
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+	InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+	MessageEvent, TextMessage, TextSendMessage,
 )
 
 import config
@@ -162,23 +162,23 @@ def get_log_query():
 
 @application.route("/callback", methods=['POST'])
 def callback():
-    signature = request.headers['X-Line-Signature']
+	signature = request.headers['X-Line-Signature']
 
-    # get request body as text
-    body = request.get_data(as_text=True)
+	# get request body as text
+	body = request.get_data(as_text=True)
 
-    # parse webhook body
-    try:
-        events = parser.parse(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+	# parse webhook body
+	try:
+		events = parser.parse(body, signature)
+	except InvalidSignatureError:
+		abort(400)
 
-    # if event is MessageEvent and message is TextMessage, then echo text
-    for event in events:
-        if not isinstance(event, MessageEvent):
-            continue
-        if not isinstance(event.message, TextMessage):
-            continue
+	# if event is MessageEvent and message is TextMessage, then echo text
+	for event in events:
+		if not isinstance(event, MessageEvent):
+			continue
+		if not isinstance(event.message, TextMessage):
+			continue
 
 		if isinstance(event.source, SourceUser):
 			client = {}
@@ -189,12 +189,12 @@ def callback():
 			analyzer = Analyzer(query, query, client)
 			result = analyzer.do()
 
-	        line_bot_api.reply_message(
-	            event.reply_token,
-	            TextSendMessage(text=result["conclusion"])
-	        )
+			line_bot_api.reply_message(
+				event.reply_token,
+				TextSendMessage(text=result["conclusion"])
+			)
 
-    return 'OK'
+	return 'OK'
 
 @application.after_request
 def after_request(response):
