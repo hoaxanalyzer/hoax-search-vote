@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import os
+import sys
 import logging
 import json
 import re
@@ -8,11 +12,26 @@ from core import Analyzer
 from core import Feedback
 from core import Management
 
-#from information_ex import generate_query
-
 from flask import Flask, Response
-from flask import request
+from flask import request, abort
 from flask_cors import CORS, cross_origin
+
+from linebot import (
+    LineBotApi, WebhookParser
+)
+from linebot.exceptions import (
+    InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+)
+
+import config
+
+channel_secret = config.line_channel_secret
+channel_access_token = config.line_channel_access_token
+line_bot_api = LineBotApi(channel_access_token)
+parser = WebhookParser(channel_secret)
 
 application = Flask(__name__)
 CORS(application)
@@ -140,6 +159,34 @@ def get_log_query():
 	except:
 		result = json.dumps({"status": "Failed", "message": "Request error"})
 	return result
+
+@app.route("/callback", methods=['POST'])
+def callback():
+    signature = request.headers['X-Line-Signature']
+
+    # get request body as text
+    body = request.get_data(as_text=True)
+    app.logger.info("Request body: " + body)
+
+    # parse webhook body
+    try:
+        events = parser.parse(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+
+    # if event is MessageEvent and message is TextMessage, then echo text
+    for event in events:
+        if not isinstance(event, MessageEvent):
+            continue
+        if not isinstance(event.message, TextMessage):
+            continue
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=event.message.text)
+        )
+
+    return 'OK'
 
 @application.after_request
 def after_request(response):

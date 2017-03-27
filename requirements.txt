@@ -1,4 +1,7 @@
 sklearn
+nltk
+PyEnchant
+python-weka-wrapper3
 numpy
 scipy
 gensim
