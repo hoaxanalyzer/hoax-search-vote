@@ -182,6 +182,9 @@ def callback():
 			continue
 
 		if isinstance(event.source, SourceUser):
+			profile = line_bot_api.get_profile(event.source.user_id)
+			profile_id = profile.user_id
+
 			client = {}
 			client['ip'] = '0.0.0.0'
 			client['browser'] = 'LINE BOT'
@@ -192,9 +195,14 @@ def callback():
 
 			line_bot_api.reply_message(
 				event.reply_token,
-				TextSendMessage(text=result["conclusion"])
+				TextSendMessage(text="Please wait while we process that ^^")
 			)
 
+			line_bot_api.push_message(
+				profile_id,
+				TextSendMessage(text=result["conclusion"])
+			)
+			
 	return 'OK'
 
 @application.after_request
