@@ -189,20 +189,20 @@ def callback():
 			client['ip'] = '0.0.0.0'
 			client['browser'] = 'LINE BOT'
 
-			query = event.message.text
-			analyzer = Analyzer(query, query, client)
-			result = analyzer.do()
-
 			line_bot_api.reply_message(
 				event.reply_token,
 				TextSendMessage(text="Please wait while we process that ^^")
 			)
 
+			query = event.message.text
+			analyzer = Analyzer(query, query, client)
+			result = analyzer.do()
+
 			line_bot_api.push_message(
 				profile_id,
 				TextSendMessage(text=result["conclusion"])
 			)
-			
+
 	return 'OK'
 
 @application.after_request

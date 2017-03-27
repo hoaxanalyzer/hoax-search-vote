@@ -28,7 +28,7 @@ class Analyzer:
 	
 	def _get_query_hoax(self):
 		## TRying not using + Hoax query, maybe better?
-		return self.query + ''
+		return self.query + ' hoax'
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
