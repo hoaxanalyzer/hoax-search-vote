@@ -40,7 +40,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 # curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
 
-def detect_client():	
+def detect_client():
 	client = {}
 	client['ip'] = '0.0.0.0'
 	client['browser'] = 'Undetected'
@@ -160,13 +160,12 @@ def get_log_query():
 		result = json.dumps({"status": "Failed", "message": "Request error"})
 	return result
 
-@app.route("/callback", methods=['POST'])
+@application.route("/callback", methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
 
     # get request body as text
     body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
 
     # parse webhook body
     try:
@@ -181,10 +180,19 @@ def callback():
         if not isinstance(event.message, TextMessage):
             continue
 
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=event.message.text)
-        )
+		if isinstance(event.source, SourceUser):
+			client = {}
+			client['ip'] = '0.0.0.0'
+			client['browser'] = 'LINE BOT'
+
+			query = event.message.text
+			analyzer = Analyzer(query, query, client)
+			result = analyzer.do()
+
+	        line_bot_api.reply_message(
+	            event.reply_token,
+	            TextSendMessage(text=result["conclusion"])
+	        )
 
     return 'OK'
 
