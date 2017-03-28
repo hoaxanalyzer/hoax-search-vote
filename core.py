@@ -72,7 +72,7 @@ class Analyzer:
 
 		sentences = []
 		for article in dataset:
-			sentences.append(article.content_clean[:200])
+			sentences.append(article.content_clean[:125])
 
 		# ATTETION HERE! CHANGE THE QUERY TO TEXT
 		#similar = Similar(self._get_query_hoax(), sentences)

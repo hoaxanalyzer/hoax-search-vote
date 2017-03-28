@@ -101,6 +101,7 @@ class Searcher:
 							obj["url"] = link.link
 							urldict[link.link] = True
 							obj["date"] = None
+							obj["title"] = link.title
 							searches.append(obj)
 							count += 1
 
@@ -202,7 +203,7 @@ class Searcher:
 			article = {}
 			article["qhash"] = self.query_hash
 			article["hash"] = uuid.uuid4().hex
-			article["content"] = l
+			article["content"] = data["title"] + '. ' + l
 			article["url"] = str(url)
 			article["date"] = str(date)
 			articles.append(article)
