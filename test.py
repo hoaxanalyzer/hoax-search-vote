@@ -141,7 +141,7 @@ testqueries = ["Free Cone Day from Daily Queen Holding",
 "When hippos are upset, their sweat turns red",
 "Bananas are curved because they grow towards the sun.",
 "A lion's roar can be heard from 5 miles away!",
-"Facebook, Skype and Twitter are all banned in China.",
+#"Facebook, Skype and Twitter are all banned in China.",
 "A baby octopus is about the size of a flea when it is born",
 "Japanese invaded and occupied Indonesia 1942",
 "Soekarno is the first president of Indonesia",
@@ -203,12 +203,19 @@ testqueries = ["Free Cone Day from Daily Queen Holding",
 "HK UST in Hongkong",
 "Actor Anthony Hopkins has died"]
 
-# for query in testqueries:
-# 	#print(query)
-# 	analyzer = Analyzer(query, query)
-# 	result = analyzer.do()
-# 	print result["conclusion"]
-# 	#print result["scores"]
+for query in testqueries:
+	print(query)
+	analyzer = Analyzer(query, query)
+	result = analyzer.do()
+	print(result["conclusion"])
+	#print result["scores"]
+
+for query in testqueries:
+	print(query + ' hoax')
+	analyzer = Analyzer(query, query)
+	result = analyzer.do()
+	print(result["conclusion"])
+	#print result["scores"]
 
 
 ### TEST ONLY ONE QUERY with SPECIFIC HASH ###
@@ -218,20 +225,20 @@ specific = ["Weapons-wielding clowns from the U.S. invaded Canada and murdered 2
 # result = analyzer.do()
 # print result["conclusion"]
 
-query = "Weapons-wielding clowns from the U.S. invaded Canada and murdered 23 victim"
-query2 = "earth is flat"
-query3 = "alan rickman dead"
-query4 = "jackie chan dead"
-query5 = "steve jobs dead"
-indoquery = "Bandung kota di prediksi Bakal Kacau, Besok Di sinyalir ada Dua Kubu besar, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
-lala = "flat earth"
-bush = "WASHINGTON—George W. Bush, 43rd president of the United States of America, passed away painlessly in his sleep Monday night"
+# query = "Weapons-wielding clowns from the U.S. invaded Canada and murdered 23 victim"
+# query2 = "earth is flat"
+# query3 = "alan rickman dead"
+# query4 = "jackie chan dead"
+# query5 = "steve jobs dead"
+# indoquery = "Bandung kota di prediksi Bakal Kacau, Besok Di sinyalir ada Dua Kubu besar, 1.Demo lg besaran,,,2.Ojek Online gabungan Mau Kumpul Minta Tggung jawab ke kubu Angkot Gabungan"
+# lala = "flat earth"
+# bush = "WASHINGTON—George W. Bush, 43rd president of the United States of America, passed away painlessly in his sleep Monday night"
 
-analyzer = Analyzer(query4, query4)
-result = analyzer.do()
-print(result["scores"])
-print(result["conclusion"])
-print(result["references"])
+# analyzer = Analyzer(query4, query4)
+# result = analyzer.do()
+# print(result["scores"])
+# print(result["conclusion"])
+# print(result["references"])
 # http://stackoverflow.com/questions/38076220/python-mysqldb-connection-in-a-class
 
 ### DATASET CREATOR ###

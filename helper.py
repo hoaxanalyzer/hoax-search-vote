@@ -21,7 +21,7 @@ import gevent
 from gevent import monkey
 from gevent import Greenlet
 
-#from GoogleScraper import scrape_with_config, GoogleSearchError
+from GoogleScraper import scrape_with_config, GoogleSearchError
 
 start = time.time()
 
@@ -46,6 +46,7 @@ class Searcher:
 			self.query = self.query.replace(w, ' ')
 
 		self.query = self.query[:100]
+		self.query_exc = ' -youtube -wikipedia -amazon -wordpress -blogspot -facebook -twitter -pinterest -google'
 
 		self.query_hash = hashlib.sha256((self.query).encode('utf-8')).hexdigest()
 		self.articledir = Searcher.basedir + '/' + self.query_hash
@@ -66,10 +67,41 @@ class Searcher:
 			if len(cache) != 0:
 				self.db.del_reference_by_qhash(self.query_hash)
 
-			jobs = [gevent.spawn(self.google), gevent.spawn(self.bing)]
-			gevent.joinall(jobs)
+			keyword = self.query + self.query_exc
 
-			searches = [jobs[0].value, jobs[1].value]
+			config = {
+				'use_own_ip': True,
+				'keyword': keyword,
+				'search_engines': ['google', 'bing'],
+				'num_pages_for_keyword': 1,
+				'num_results_per_page': 10,
+				'scrape_method': 'selenium',
+				'sel_browser': 'chrome',
+				'do_caching': False
+			}
+
+			try:
+				search = scrape_with_config(config)
+			except GoogleSearchError as e:
+				print(e)
+
+			searches = []
+			for serp in search.serps:
+				count = 0
+				data = []
+				for link in serp.links:
+					if link.link_type == "results" and count < 10:
+						obj = {}
+						obj["url"] = link.link
+						obj["date"] = None
+						data.append(obj)
+						count += 1
+				searches.append(data)
+
+			# jobs = [gevent.spawn(self.google), gevent.spawn(self.bing)]
+			# gevent.joinall(jobs)
+
+			# searches = [jobs[0].value, jobs[1].value]
 	
 			manager = multiprocessing.Manager()
 			datasets = manager.list()
