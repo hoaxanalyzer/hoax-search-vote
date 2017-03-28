@@ -1,0 +1,3 @@
+from extractor import hoax_analyzer
+
+print(hoax_analyzer.build_query("URGENT WARNING! Be careful not to take the paracetamol that comes written P / 500. It is a new, very white and shiny paracetamol, doctors prove to contain “Machupo” virus, considered one of the most dangerous viruses in the world. And with high mortality rate. Please share this message, for all people and family. And save life from them ….. I’ve done my part, now it’s your turn … remember that God helps those who help."))

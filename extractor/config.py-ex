@@ -1,0 +1,9 @@
+"""
+
+CONFIG_FILES
+
+"""
+
+# Your account key goes here.
+microsoft_text_analytics_account_key = 
+microsoft_computer_vision_account_key = 

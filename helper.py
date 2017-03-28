@@ -97,7 +97,7 @@ class Searcher:
 				for link in serp.links:
 					if link.link_type == "results" and count < 10:
 						obj = {}
-						if link.link in urldict:
+						if not link.link in urldict:
 							obj["url"] = link.link
 							urldict[link.link] = True
 							obj["date"] = None
