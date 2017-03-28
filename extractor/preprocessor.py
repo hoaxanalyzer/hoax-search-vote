@@ -26,7 +26,7 @@ with open('resource/stopwords_en.txt', 'r') as myfile:
 
 def preprocess(text):
     text = text.encode('utf-8').decode("ascii", "replace").replace(u"\ufffd", "_").replace("___", "'").replace("'s", " ").replace("``", " ").replace("''", " ").replace("_", " ").replace("'"," ").replace("`"," ")
-    text = re.sub('[^0-9a-zA-Z]+', ' ', text)
+    text = re.sub("[^0-9a-zA-Z !\"/:;<=>?.,!@#$%^&-_|()']+", " ", text)
     tokens = text.split(" ")
     result = ""
     for token in tokens:

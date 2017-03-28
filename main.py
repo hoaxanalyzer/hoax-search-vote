@@ -27,7 +27,11 @@ from linebot.models import (
 	SourceUser, SourceGroup, SourceRoom,
 )
 
+from extractor import hoax_analyzer
+import weka.core.jvm as jvm
 import config
+
+jvm.start()
 
 channel_secret = config.line_channel_secret
 channel_access_token = config.line_channel_access_token
@@ -59,22 +63,20 @@ def index():
 
 @application.route("/analyze", methods=['POST'])
 def analyze():
-	try:
-		client = detect_client()
-		query = request.json['query']
-		query = query.replace('\n', '')
-		
-		logging.info("Getting query: " + query)
+	#try:
+	client = detect_client()
+	query = request.json['query']
+	query = query.replace('\n', '')
+	
+	logging.info("Getting query: " + query)
 
-		extracted_query = query
-		#extracted_query = generate_query(query)
-		#extracted_query = re.sub(r"(null_)\d", "", extracted_query)
-		extracted_query = extracted_query.strip()
-		extracted_query = extracted_query.lower()
-		analyzer = Analyzer(query, extracted_query, client)
-		result = json.dumps(analyzer.do())
-	except Exception as e:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
+	extracted_query = hoax_analyzer.build_query(query)
+	extracted_query = extracted_query.strip()
+	extracted_query = extracted_query.lower()
+	analyzer = Analyzer(query, extracted_query, client)
+	result = json.dumps(analyzer.do())
+	#except Exception as e:
+	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/analyze/stream", methods=['POST'])
@@ -87,9 +89,7 @@ def analyze_stream():
 			
 			logging.info("Getting query: " + query)
 
-			extracted_query = query
-			#extracted_query = generate_query(query)
-			#extracted_query = re.sub(r"(null_)\d", "", extracted_query)
+			extracted_query = hoax_analyzer.build_query(query)
 			extracted_query = extracted_query.strip()
 			extracted_query = extracted_query.lower()
 			analyzer = Analyzer(query, extracted_query, client)
@@ -191,16 +191,26 @@ def callback():
 
 			line_bot_api.reply_message(
 				event.reply_token,
-				TextSendMessage(text="Please wait while we process that ^^")
+				TextSendMessage(text="Please wait while we process that, this usually took less than a minute ^_^")
 			)
 
-			query = event.message.text
-			analyzer = Analyzer(query, query, client)
+			query = event.message.text			
+			extracted_query = hoax_analyzer.build_query(query)
+			extracted_query = extracted_query.strip()
+			extracted_query = extracted_query.lower()
+			analyzer = Analyzer(query, extracted_query, client)
 			result = analyzer.do()
+
+			text_result = "The result is: " + result["conclusion"]
+			check_out = "Checkout more here: https://http://antihoax.azurewebsites.net/result/" + result["hash"]
 
 			line_bot_api.push_message(
 				profile_id,
-				TextSendMessage(text=result["conclusion"])
+				TextSendMessage(text=text_result)
+			)
+			line_bot_api.push_message(
+				profile_id,
+				TextSendMessage(text=check_out)
 			)
 
 	return 'OK'

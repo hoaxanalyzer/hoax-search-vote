@@ -17,3 +17,5 @@ google
 flask
 flask_cors
 gunicorn
+pyvirtualdisplay
+line-bot-sdk

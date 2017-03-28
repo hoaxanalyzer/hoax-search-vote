@@ -163,12 +163,14 @@ def classify_json_object(lang, tag, json_data):
         tag_list = EN_TAG
         tag_feature = EN_TAG_FEATURE
 
+    # print (attr)
     val = []
-    for i in range(0,n_feature):
-        for tag in tag_list:
+    for tag in tag_list:
+        for i in range(0,n_feature):
             for ftr in tag_feature:
                 cur_key = tag + str(i + 1)
                 val.append(json_data[cur_key][cur_key + "_" + ftr])
+                # print(cur_key + "_" + ftr, json_data[cur_key][cur_key + "_token"], json_data[cur_key][cur_key + "_" + ftr])
     val.append(0)
     inst = Instance.create_instance(val)
     dataset.add_instance(inst)
