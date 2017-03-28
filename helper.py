@@ -72,8 +72,8 @@ class Searcher:
 			if len(cache) != 0:
 				self.db.del_reference_by_qhash(self.query_hash)
 
-			keyword = self.query + self.query_exc
-
+			keyword = self.query
+			
 			config = {
 				'use_own_ip': True,
 				'keyword': keyword,
