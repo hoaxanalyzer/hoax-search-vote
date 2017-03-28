@@ -33,11 +33,15 @@ class Analyzer:
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
 		if (conclusion[2] >= conclusion[1]):
+			if (conclusion[2] < 2): return 3
+			if (conclusion[2] >= conclusion[1] * 2): return 2
 			if (conclusion[2] > (conclusion[1] + conclusion[3])): return 2
 			else:
 				if ((conclusion[1] + conclusion[3]) - conclusion[2] < THRESHOLD_UNKNOWN): return 2
 				else: return 3
 		elif (conclusion[2] < conclusion[1]):
+			if (conclusion[1] < 2): return 3
+			if (conclusion[2] < conclusion[1] * 2): return 1
 			if ((conclusion[3] + conclusion[2]) < conclusion[1]): return 1
 			else:
 				if ((conclusion[3] + conclusion[2]) - conclusion[1] < THRESHOLD_UNKNOWN): return 1
@@ -68,7 +72,7 @@ class Analyzer:
 
 		sentences = []
 		for article in dataset:
-			sentences.append(article.content_clean)
+			sentences.append(article.content_clean[:200])
 
 		# ATTETION HERE! CHANGE THE QUERY TO TEXT
 		#similar = Similar(self._get_query_hoax(), sentences)
