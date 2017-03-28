@@ -72,7 +72,7 @@ class Analyzer:
 
 		sentences = []
 		for article in dataset:
-			sentences.append(article.content_clean[:125])
+			sentences.append(article.content_clean[:300])
 
 		# ATTETION HERE! CHANGE THE QUERY TO TEXT
 		#similar = Similar(self._get_query_hoax(), sentences)
@@ -97,7 +97,7 @@ class Analyzer:
 			self.query = query["query_search"]
 			self.text = query["query_text"]
 
-			s = Searcher("this is not query")
+			s = Searcher(self.query)
 			dataset = s.get_news(query["query_hash"])
 
 			conclusion = self._get_conclusion(dataset)
@@ -113,6 +113,7 @@ class Analyzer:
 				data["text"] = r.content
 				data["id"] = r.ahash
 				data["site_score"] = r.url_score
+				data["feature"] = str(r.get_humanize_feature())
 				lor.append(data)
 
 			result = {}
