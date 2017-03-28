@@ -32,6 +32,9 @@ from newspaper import Article as News
 from article import Article
 from database import Database
 
+from pyvirtualdisplay import Display
+from selenium import webdriver
+
 import config
 
 class Searcher:
@@ -60,6 +63,8 @@ class Searcher:
 		return self.db.get_reference_by_qhash(self.query_hash)
 
 	def search_all(self):
+		display = Display(visible=0, size=(1024, 768))
+		display.start()
 		print("Start search for query: " + self.query)
 		cache = self._get_cache()
 		if not len(cache) > 10:
@@ -122,6 +127,8 @@ class Searcher:
 				a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
 				datasets.append(a)
 			return datasets
+
+		display.stop()
 
 	def search(self, searches, datasets):
 		mps = []

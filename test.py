@@ -1,5 +1,6 @@
 import logging
 import json
+import time
 
 from core import Analyzer
 from article import Article
@@ -208,6 +209,7 @@ for query in testqueries:
 	analyzer = Analyzer(query, query)
 	result = analyzer.do()
 	print(result["conclusion"])
+	time.sleep(2)
 	#print result["scores"]
 
 for query in testqueries:
@@ -215,6 +217,7 @@ for query in testqueries:
 	analyzer = Analyzer(query, query)
 	result = analyzer.do()
 	print(result["conclusion"])
+	time.sleep(2)
 	#print result["scores"]
 
 
