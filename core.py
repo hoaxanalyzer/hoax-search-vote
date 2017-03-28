@@ -95,6 +95,7 @@ class Analyzer:
 		query = self.db.get_query_by_loghash(loghash)
 		if not query == None:
 			self.query = query["query_search"]
+			self.text = query["query_text"]
 
 			s = Searcher("this is not query")
 			dataset = s.get_news(query["query_hash"])
