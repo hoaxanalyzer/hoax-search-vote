@@ -28,7 +28,8 @@ class WordGram:
 class Article:
 	factgram = [WordGram(["not hoax", "bukan hoax"]), \
 				WordGram(["(?<!not\s)accurate", "(?<!tidak\s)akurat"]), \
-				WordGram(["(?<!not\s)true", "(?<!tidak\s)benar"]), \
+				#WordGram(["(?<!not\s)true", "(?<!tidak\s)benar"]), \
+				WordGram(["(?<!not\s)true"]), \
 				WordGram(["(?<!no\s)proof", "bukti", "(?<!tidak\s)terbukti"]), \
 				WordGram(["scientific", "ilmiah"]), \
 				WordGram(["paper", "jurnal"]), \

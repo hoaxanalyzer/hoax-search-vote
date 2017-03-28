@@ -1,6 +1,6 @@
 import logging
-from future.standard_library import install_aliases
-install_aliases()
+#from future.standard_library import install_aliases
+#install_aliases()
 
 ## SIMILAR
 from gensim import corpora, models, similarities
@@ -15,7 +15,7 @@ import multiprocessing
 import uuid
 
 import requests
-import urllib.parse
+#import urllib.parse
 
 import gevent
 from gevent import monkey
@@ -63,8 +63,6 @@ class Searcher:
 		return self.db.get_reference_by_qhash(self.query_hash)
 
 	def search_all(self):
-		display = Display(visible=0, size=(1024, 768))
-		display.start()
 		print("Start search for query: " + self.query)
 		cache = self._get_cache()
 		if not len(cache) > 10:
@@ -72,12 +70,14 @@ class Searcher:
 			if len(cache) != 0:
 				self.db.del_reference_by_qhash(self.query_hash)
 
+			display = Display(visible=0, size=(1024, 768))
+			display.start()
 			keyword = self.query
-			
+
 			config = {
 				'use_own_ip': True,
 				'keyword': keyword,
-				'search_engines': ['google', 'bing'],
+				'search_engines': ['duckduckgo', 'bing'],
 				'num_pages_for_keyword': 1,
 				'num_results_per_page': 10,
 				'scrape_method': 'selenium',
@@ -91,34 +91,38 @@ class Searcher:
 				print(e)
 
 			searches = []
+			urldict = {}
 			for serp in search.serps:
 				count = 0
-				data = []
 				for link in serp.links:
 					if link.link_type == "results" and count < 10:
 						obj = {}
-						obj["url"] = link.link
-						obj["date"] = None
-						data.append(obj)
-						count += 1
-				searches.append(data)
+						if link.link in urldict:
+							obj["url"] = link.link
+							urldict[link.link] = True
+							obj["date"] = None
+							searches.append(obj)
+							count += 1
 
+			display.stop()
 			# jobs = [gevent.spawn(self.google), gevent.spawn(self.bing)]
 			# gevent.joinall(jobs)
 
 			# searches = [jobs[0].value, jobs[1].value]
 	
-			manager = multiprocessing.Manager()
-			datasets = manager.list()
-			mps = []
-			print("Start retrieving datasets")
-			for s in searches:
-				go = multiprocessing.Process(target=self.search, args=(s, datasets,))
-				mps.append(go)
-				go.start()
-			for mp in mps:
-				mp.join()
-			pdatasets = [x for x in datasets]
+			# manager = multiprocessing.Manager()
+			# datasets = manager.list()
+			# mps = []
+			# print("Start retrieving datasets")
+			# for s in searches:
+			# 	go = multiprocessing.Process(target=self.search, args=(s, datasets,))
+			# 	mps.append(go)
+			# 	go.start()
+			# for mp in mps:
+			# 	mp.join()
+			# pdatasets = [x for x in datasets]
+
+			pdatasets = self.search(searches)
 			return pdatasets
 		else:
 			print("Cached")
@@ -128,9 +132,8 @@ class Searcher:
 				datasets.append(a)
 			return datasets
 
-		display.stop()
-
-	def search(self, searches, datasets):
+	#def search(self, searches, datasets):
+	def search(self, searches):
 		mps = []
 		manager = multiprocessing.Manager()
 		articles = manager.list()
@@ -147,12 +150,15 @@ class Searcher:
 			time.sleep(.1)
 
 		self.db.insert_references(self.qid, articles)
+
+		datasets = []
 		for article in articles:
 			a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
 			datasets.append(a)
 
 		print("Finish Data Gathering")
 		logging.info("Finish Data Gathering")
+		return datasets
 
 	def get_news(self, qhash):
 		articles = self.db.get_reference_by_qhash(qhash)

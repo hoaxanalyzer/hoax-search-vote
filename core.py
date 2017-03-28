@@ -202,6 +202,7 @@ class Analyzer:
 			data["text"] = r.content
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
+			data["feature"] = str(r.get_humanize_feature())
 			lor.append(data)
 
 		result = {}
