@@ -29,15 +29,15 @@ class Database:
 
 	def insert_result_log(self, qid, hoax, fact, unknown, unrelated, conclusion):
 		sql = "INSERT INTO log_result (id_query, finished_at, hoax_score, fact_score, unknown_score, unrelated_score, conclusion) VALUES" + \
-					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (qid, datetime.now(), hoax, fact, unknown, unrelated, conclusion)
-		self.cur.execute(sql)
+					"(%s, %s, %s, %s, %s, %s, %s)"
+		self.cur.execute(sql, (qid, datetime.now(), hoax, fact, unknown, unrelated, conclusion))
 		self.conn.commit()
 		return self.cur.lastrowid
 
 	def insert_result_feedback(self, qhash, is_know, reason, label, ip, browser):
 		sql = "INSERT INTO feedback_result (query_hash, reported_at, is_know, reason, feedback_label, client_ip, client_browser) VALUES" + \
-					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (qhash, datetime.now(), is_know, reason, label, ip, browser)
-		self.cur.execute(sql)
+					"(%s, %s, %s, %s, %s, %s, %s)"
+		self.cur.execute(sql, (qhash, datetime.now(), is_know, reason, label, ip, browser))
 		self.conn.commit()
 		return self.cur.lastrowid
 
@@ -45,8 +45,8 @@ class Database:
 		print(str(ahash))
 		print(str(is_relevant))
 		sql = "INSERT INTO feedback_reference (article_hash, reported_at, is_relevant, reason, feedback_label, client_ip, client_browser) VALUES" + \
-					"('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (ahash, datetime.now(), is_relevant, reason, label, ip, browser)
-		self.cur.execute(sql)
+					"(%s, %s, %s, %s, %s, %s, %s)"
+		self.cur.execute(sql, (ahash, datetime.now(), is_relevant, reason, label, ip, browser))
 		self.conn.commit()
 		return self.cur.lastrowid
 
