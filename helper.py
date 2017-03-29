@@ -198,12 +198,13 @@ class Searcher:
 		if len(str(date)) > 19:
 			date = str(date)[:19]
 
+		text = data["title"] + '. ' + text
 		l = ''.join([x for x in text if ord(x) < 128])
 		if len(l) > 0:
 			article = {}
 			article["qhash"] = self.query_hash
 			article["hash"] = uuid.uuid4().hex
-			article["content"] = data["title"] + '. ' + l
+			article["content"] = l
 			article["url"] = str(url)
 			article["date"] = str(date)
 			articles.append(article)
