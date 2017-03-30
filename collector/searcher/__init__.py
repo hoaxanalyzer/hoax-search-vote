@@ -2,12 +2,11 @@ import requests
 import time
 import json
 import hashlib
-import searcher
 from lxml import html
 from multiprocessing.pool import ThreadPool
 
-import searcher.duckduckgo
-import searcher.bing
+import collector.searcher.duckduckgo
+import collector.searcher.bing
 
 def search(search_engine, query):
 	if search_engine == "bing":
@@ -21,7 +20,7 @@ def search_all(query):
 	engine = ["bing", "duckduckgo"]
 
 	def worker(search_engine, query):
-		return (searcher.search(search_engine, query))
+		return (search(search_engine, query))
 
 	pool = ThreadPool(processes=2)
 	multiple_results = [pool.apply_async(worker, (s, query)) for s in engine]
