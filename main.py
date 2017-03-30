@@ -29,6 +29,7 @@ from linebot.models import (
 
 from extractor import hoax_analyzer
 import weka.core.jvm as jvm
+import searcher
 import config
 
 jvm.start()
@@ -73,6 +74,9 @@ def analyze():
 	extracted_query = hoax_analyzer.build_query(query)
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
+
+	logging.info("Extracted query: " + extracted_query)
+
 	analyzer = Analyzer(query, extracted_query, client)
 	result = json.dumps(analyzer.do())
 	#except Exception as e:
@@ -223,4 +227,4 @@ def after_request(response):
 	return response
 
 if __name__ == "__main__":
-	application.run(host="0.0.0.0", port=8080)
+	application.run(host="0.0.0.0", port=8085)

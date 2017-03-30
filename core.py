@@ -72,7 +72,7 @@ class Analyzer:
 
 		sentences = []
 		for article in dataset:
-			sentences.append(article.content_clean[:300])
+			sentences.append(article.content_clean[:550])
 
 		# ATTETION HERE! CHANGE THE QUERY TO TEXT
 		#similar = Similar(self._get_query_hoax(), sentences)
@@ -84,10 +84,25 @@ class Analyzer:
 		for num, result in similar.rank:
 			article = dataset[num]
 			article.set_similarity(result)
-			idx = clf.predict([article.get_features_array()])[0]
+
+			counts = article.get_category_count()
+			if counts[0] > counts[1] * 3:
+				idx = 2
+			elif counts[1] > counts[0] * 3:
+				idx = 1
+			elif counts[1] == 0 and counts[0] == 0:
+				idx = 3
+			elif len(article.content) < 850:
+				idx = 3
+			elif article.similarity < 0.045:
+				idx = 3
+			else:
+				idx = clf.predict([article.get_features_array()])[0]
+
 			article.set_label(Analyzer.target[idx])
 			conclusion[idx] += 1
 			if idx != 0: conclusion[idx] += article.weight
+
 			i += 1
 		return conclusion
 
@@ -209,6 +224,7 @@ class Analyzer:
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
 			data["feature"] = str(r.get_humanize_feature())
+			data["counts"] = str(r.get_category_count())
 			lor.append(data)
 
 		result = {}

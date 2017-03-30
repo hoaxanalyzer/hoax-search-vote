@@ -39,12 +39,12 @@ class Article:
 				WordGram(["evidence", "kesaksian", "bukti", "saksi"]), \
 				WordGram(["official", "(?<!tidak\s)resmi"])]
 
-	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung"]), \
+	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu"]), \
 				WordGram(["like a hoax", "seperti hoax", "mirip hoax"]), \
 				WordGram(["(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya"]), \
 				WordGram(["a lie", "bohong", "kebohongan"]), \
 				WordGram(["rumor", "rumor", "isu"]), \
-				WordGram(["false", "salah", "tidak benar"]), \
+				WordGram(["false", "salah", "tidak benar", "ditepis"]), \
 				WordGram(["in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya"]), \
 				WordGram(["fake news", "berita palsu", "berita yang tidak benar"]), \
 				WordGram(["debunked", "tidak terbukti", "terbukti salah"]), \
@@ -61,7 +61,7 @@ class Article:
 				WordGram(["fabricated"]), \
 				WordGram(["no truth", "tidak benar"]), \
 				WordGram(["no evidence", "tidak terbukti", "tidak ada bukti"]), \
-				WordGram(["incorrect", "salah", "tidak benar", "tidak tepat"]), \
+				WordGram(["incorrect", "salah", "tidak benar", "tidak tepat", "membantah"]), \
 				WordGram(["satire", "menyindir", "satir"]), \
 				WordGram(["altered", "diubah"]), \
 				WordGram(["if this were true", "jika benar", "jika hal ini benar"]), \
@@ -150,6 +150,31 @@ class Article:
 			features.append(self.feature_unkn[u.value])
 		features.append(self.similarity)
 		return features
+
+	def get_category_count(self):
+		category = []
+		hoax = 0
+		for h in Article.hoaxgram:
+			hoax += (self.ofeature_hoax[h.value])
+		for h in Article.hoaxgram:
+			hoax += (self.feature_hoax[h.value])
+		category.append(hoax)
+
+		fact = 0
+		for f in Article.factgram:
+			fact += (self.ofeature_fact[f.value])
+		for f in Article.factgram:
+			fact += (self.feature_fact[f.value])
+		category.append(fact)
+
+		unkn = 0
+		for u in Article.unkngram:
+			unkn += (self.ofeature_unkn[u.value])
+		for u in Article.unkngram:
+			unkn += (self.feature_unkn[u.value])
+		category.append(unkn)
+
+		return category
 
 	def get_humanize_feature(self):
 		features = {}
