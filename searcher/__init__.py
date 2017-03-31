@@ -71,12 +71,15 @@ def search_all(query):
 		content = ''.join([x for x in content if ord(x) < 128])
 		return (url, title, content, article.publish_date)
 
-	max_process = 20
-	process = multiprocessing.cpu_count()
-	if process > max_process:
-		process = max_process
+	try:
+		max_process = 20
+		process = multiprocessing.cpu_count()
+		if process > max_process:
+			process = max_process
 
-	pool = ThreadPool(processes=process)
-	multiple_results = [pool.apply_async(worker, (job.value[1], job.value[0], job.value[2],)) for job in jobs]
+		pool = ThreadPool(processes=process)
+		multiple_results = [pool.apply_async(worker, (job.value[1], job.value[0], job.value[2],)) for job in jobs]
 
-	return ([res.get(timeout=30) for res in multiple_results])
+		return ([res.get(timeout=30) for res in multiple_results])
+	except:
+		return []

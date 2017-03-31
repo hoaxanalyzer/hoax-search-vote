@@ -39,7 +39,7 @@ class Article:
 				WordGram(["evidence", "kesaksian", "bukti", "saksi"]), \
 				WordGram(["official", "(?<!tidak\s)resmi"])]
 
-	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu"]), \
+	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan"]), \
 				WordGram(["like a hoax", "seperti hoax", "mirip hoax"]), \
 				WordGram(["(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya"]), \
 				WordGram(["a lie", "bohong", "kebohongan"]), \
