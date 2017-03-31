@@ -32,6 +32,12 @@ class Analyzer:
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
+		if ((conclusion[1] == 0) and (not conclusion[2] == 0)):
+			if(conclusion[2] >= conclusion[3]): return 2
+		if ((conclusion[2] == 0) and (not conclusion[1] == 0)):
+			if(conclusion[1] >= conclusion[3]): return 1
+		if ((conclusion[3] + 2.5) > (conclusion[1] + conclusion[2])):
+			return 3
 		if (conclusion[2] >= conclusion[1]):
 			if (conclusion[2] < 2): return 3
 			if (conclusion[2] >= conclusion[1] * 2): return 2
@@ -86,16 +92,16 @@ class Analyzer:
 			article.set_similarity(result)
 
 			counts = article.get_category_count()
-			if counts[0] > counts[1] * 3:
-				idx = 2
-			elif counts[1] > counts[0] * 3:
-				idx = 1
-			elif counts[1] == 0 and counts[0] == 0:
-				idx = 3
-			elif len(article.content) < 850:
+			if len(article.content) < 400:
 				idx = 3
 			elif article.similarity < 0.045:
 				idx = 3
+			elif counts[1] == 0 and counts[0] == 0:
+				idx = 1
+			elif counts[0] > counts[1] * 3:
+				idx = 2
+			elif counts[1] > counts[0] * 3:
+				idx = 1
 			else:
 				idx = clf.predict([article.get_features_array()])[0]
 

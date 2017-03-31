@@ -29,7 +29,7 @@ class Article:
 	factgram = [WordGram(["not hoax", "bukan hoax"]), \
 				WordGram(["(?<!not\s)accurate", "(?<!tidak\s)akurat"]), \
 				#WordGram(["(?<!not\s)true", "(?<!tidak\s)benar"]), \
-				WordGram(["(?<!not\s)true"]), \
+				WordGram(["(?<!not\s)true", "fakta"]), \
 				WordGram(["(?<!no\s)proof", "bukti", "(?<!tidak\s)terbukti"]), \
 				WordGram(["scientific", "ilmiah"]), \
 				WordGram(["paper", "jurnal"]), \
@@ -44,7 +44,7 @@ class Article:
 				WordGram(["(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya"]), \
 				WordGram(["a lie", "bohong", "kebohongan"]), \
 				WordGram(["rumor", "rumor", "isu"]), \
-				WordGram(["false", "salah", "tidak benar", "ditepis"]), \
+				WordGram(["false", "tidak benar", "ditepis"]), \
 				WordGram(["in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya"]), \
 				WordGram(["fake news", "berita palsu", "berita yang tidak benar"]), \
 				WordGram(["debunked", "tidak terbukti", "terbukti salah"]), \
@@ -61,7 +61,7 @@ class Article:
 				WordGram(["fabricated"]), \
 				WordGram(["no truth", "tidak benar"]), \
 				WordGram(["no evidence", "tidak terbukti", "tidak ada bukti"]), \
-				WordGram(["incorrect", "salah", "tidak benar", "tidak tepat", "membantah"]), \
+				WordGram(["incorrect", "tidak tepat", "membantah"]), \
 				WordGram(["satire", "menyindir", "satir"]), \
 				WordGram(["altered", "diubah"]), \
 				WordGram(["if this were true", "jika benar", "jika hal ini benar"]), \
@@ -261,6 +261,6 @@ class Article:
 		## Make more punishing for non-credible sites
 		if domain in Article.sitedata:
 			if Article.sitedata[domain] == 'credible': return 2
-			else: return -1
+			else: return -2
 		else: return 0
 
