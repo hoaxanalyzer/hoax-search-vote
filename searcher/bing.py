@@ -4,7 +4,7 @@ import json
 import urllib.parse
 
 def search(keywords, max_results=None):
-	exclusion = " -facebook.com -youtube.com -twitter.com -blogspot.com -pinterest.com -amazon.com -wordpress.com"
+	exclusion = " -facebook.com -youtube.com -twitter.com -blogspot.com -pinterest.com -amazon.com -wordpress.com -smule.com"
 
 	data =[]
 	url = 'https://bing.com/search?'
@@ -26,8 +26,9 @@ def search(keywords, max_results=None):
 	results = [a.get('href') for a in doc.cssselect('.b_algo h2 a')]
 	title = [a.text_content() for a in doc.cssselect('.b_algo h2 a')]
 	for result in results:
-		data.append({"url": (result), "title": title[yielded], "se": "bing"})
-		yielded += 1
+		if check_url(result):
+			data.append({"url": (result), "title": title[yielded], "se": "bing"})
+			yielded += 1
 		if max_results and yielded >= max_results:
 			return data
 	return data
@@ -61,6 +62,13 @@ def sanitize_url(url):
 	redirect_url = urllib.parse.parse_qs(parsed_url.query)['r']
 	return redirect_url[0]
 
+def check_url(url):
+	exclusion = ["facebook.com", "youtube.com", "twitter.com", "blogspot.com", "pinterest.com", "amazon.com", "wordpress.com", "smule.com"]
+	for blacklist in exclusion:
+		if blacklist in url.lower():
+			return False
+	return True
+	
 def main():
 	print(search('habibie meninggal'))
 

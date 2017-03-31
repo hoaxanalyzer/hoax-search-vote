@@ -9,7 +9,7 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 start = time.time()
 
 def aa():
-	print(searcher.search_all("habibie meninggal"))
+	(searcher.search_all("youtube"))
 
 aa()
 

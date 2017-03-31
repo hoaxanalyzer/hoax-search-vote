@@ -22,7 +22,7 @@ def search(search_engine, query):
 	if search_engine == "bing":
 		return bing.search(query, max_results=10)
 	if search_engine == "duckduckgo":
-		return duckduckgo.search(query, max_results=10)
+		return duckduckgo.search(query, max_results=20)
 	return None
 
 def search_all(query):
@@ -42,6 +42,8 @@ def search_all(query):
 			if not url[:4] == "http":
 				se["url"] = "http://" + url
 			results[hashlib.sha1(se["url"].encode()).hexdigest()] = se
+
+	print(results)
 
 	def request_worker(result):
 		req = urllib.request.Request(result["url"], headers={'User-Agent' : "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.0.1) Gecko/20020919"}) 
