@@ -74,42 +74,45 @@ class Analyzer:
 		return selected
 
 	def _get_conclusion(self, dataset):
-		dataset = self.__calculate_weight(dataset)
-
-		sentences = []
-		for article in dataset:
-			sentences.append(article.content_clean[:550])
-
-		# ATTETION HERE! CHANGE THE QUERY TO TEXT
-		#similar = Similar(self._get_query_hoax(), sentences)
-		similar = Similar(self.text, sentences)
-		clf = joblib.load('./models/generated_model.pkl') 
-		i = 0
 		conclusion = [0] * 4
 
-		for num, result in similar.rank:
-			article = dataset[num]
-			article.set_similarity(result)
+		if len(dataset) > 2:
+			dataset = self.__calculate_weight(dataset)
 
-			counts = article.get_category_count()
-			if len(article.content) < 400:
-				idx = 3
-			elif article.similarity < 0.045:
-				idx = 3
-			elif counts[1] == 0 and counts[0] == 0:
-				idx = 1
-			elif counts[0] > counts[1] * 3:
-				idx = 2
-			elif counts[1] > counts[0] * 3:
-				idx = 1
-			else:
-				idx = clf.predict([article.get_features_array()])[0]
+			sentences = []
+			for article in dataset:
+				sentences.append(article.content_clean[:550])
 
-			article.set_label(Analyzer.target[idx])
-			conclusion[idx] += 1
-			if idx != 0: conclusion[idx] += article.weight
+			# ATTETION HERE! CHANGE THE QUERY TO TEXT
+			#similar = Similar(self._get_query_hoax(), sentences)
+			similar = Similar(self.text, sentences)
+			clf = joblib.load('./models/generated_model.pkl') 
+			i = 0
 
-			i += 1
+			for num, result in similar.rank:
+				article = dataset[num]
+				article.set_similarity(result)
+
+				counts = article.get_category_count()
+				if len(article.content) < 400:
+					idx = 3
+				elif article.similarity < 0.045:
+					idx = 3
+				elif counts[1] == 0 and counts[0] == 0:
+					idx = 1
+				elif counts[0] > counts[1] * 3:
+					idx = 2
+				elif counts[1] > counts[0] * 3:
+					idx = 1
+				else:
+					idx = clf.predict([article.get_features_array()])[0]
+
+				article.set_label(Analyzer.target[idx])
+				conclusion[idx] += 1
+				if idx != 0: conclusion[idx] += article.weight
+
+				i += 1
+
 		return conclusion
 
 	def retrieve(self, loghash):
