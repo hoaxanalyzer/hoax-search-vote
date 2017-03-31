@@ -33,9 +33,9 @@ class Analyzer:
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
 		if ((conclusion[1] == 0) and (not conclusion[2] == 0)):
-			if(conclusion[2] >= conclusion[3]): return 2
+			if(conclusion[2] >= (conclusion[3] - (conclusion[2]/2))): return 2
 		if ((conclusion[2] == 0) and (not conclusion[1] == 0)):
-			if(conclusion[1] >= conclusion[3]): return 1
+			if(conclusion[1] >= (conclusion[3] - (conclusion[1]/2))): return 1
 		if ((conclusion[3] + 2.5) > (conclusion[1] + conclusion[2])):
 			return 3
 		if (conclusion[2] >= conclusion[1]):
