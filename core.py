@@ -18,7 +18,8 @@ class Analyzer:
 
 	def __init__(self, text, query, client=None):
 		self.text = text
-		self.query = query
+		#self.query = query
+		self.query = ' '.join(self.__query_unique_list(query.split()))
 	
 		self.client = client
 		if not type(self.client) is dict:
@@ -29,6 +30,11 @@ class Analyzer:
 	def _get_query_hoax(self):
 		## TRying not using + Hoax query, maybe better?
 		return self.query + ''
+
+	def __query_unique_list(self, l):
+	    ulist = []
+	    [ulist.append(x) for x in l if x not in ulist]
+	    return ulist
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
@@ -100,9 +106,9 @@ class Analyzer:
 					idx = 3
 				elif counts[1] == 0 and counts[0] == 0:
 					idx = 1
-				elif counts[0] > counts[1] * 3:
+				elif counts[0] > counts[1] * 2.5:
 					idx = 2
-				elif counts[1] > counts[0] * 3:
+				elif counts[1] > counts[0] * 2.5:
 					idx = 1
 				else:
 					idx = clf.predict([article.get_features_array()])[0]
@@ -138,6 +144,7 @@ class Analyzer:
 				data["id"] = r.ahash
 				data["site_score"] = r.url_score
 				data["feature"] = str(r.get_humanize_feature())
+				data["counts"] = str(r.get_category_count())
 				lor.append(data)
 
 			result = {}
@@ -191,6 +198,8 @@ class Analyzer:
 			data["text"] = r.content
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
+			data["feature"] = str(r.get_humanize_feature())
+			data["counts"] = str(r.get_category_count())
 			lor.append(data)
 
 		result = {}

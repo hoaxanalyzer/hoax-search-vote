@@ -34,10 +34,14 @@ class Model:
 		feedbacks = self.db.get_reference_feedback()
 
 		with open(self.csvlocation, 'w') as file:
-			file.write("desc,fea1,fea2,fea3,fea4,fea5,fea6,fea7,fea8,fea9,fea10,fea11,fea12,fea13,fea14,fea15,fea16,fea17,fea18,fea19,fea20,fea21,fea22,fea23,fea24,fea25,fea26,fea27,fea28,fea29,fea30,fea31,fea32,fea33,fea34,fea35,fea36,fea37,fea38,fea39,fea40,fea41,fea42,fea43,fea44,fea45,fea46,fea47,fea1,fea2,fea3,fea4,fea5,fea6,fea7,fea8,fea9,fea10,fea11,fea12,fea13,fea14,fea15,fea16,fea17,fea18,fea19,fea20,fea21,fea22,fea23,fea24,fea25,fea26,fea27,fea28,fea29,fea30,fea31,fea32,fea33,fea34,fea35,fea36,fea37,fea38,fea39,fea40,fea41,fea42,fea43,fea44,fea45,fea46,fea47,similarity,label\n")
+			file.write("desc,fea1,fea2,fea3,fea21,fea22,fea23,similarity,label\n")
+			length = len(feedbacks)
 			for qid in feedbacks:
 				datasets = []
 				sentences = []
+
+				print(str(qid) + "/" + str(length))
+
 				for feedback in feedbacks[qid]:
 					## THE QUERY COULD RESULT IN INCONSISTENCY, PLEASE STANDARIZE: TEXT INPUT OR QUERY TO S.E.??
 					article = Article(feedback["query_search"], "None", "None", feedback["article_content"], "None")
@@ -66,7 +70,7 @@ class Model:
 		df2, targets = self._encode_target(df, "label")
 
 		print(targets)
-		features = list(df2.columns[:95])
+		features = list(df2.columns[:7])
 		print("* features:", features)
 
 		y = df2["target"]

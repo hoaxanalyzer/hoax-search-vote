@@ -4,7 +4,7 @@ import json
 import urllib.parse
 
 def search(keywords, max_results=None):
-	exclusion = " -facebook.com -youtube.com -twitter.com -blogspot.com -pinterest.com -amazon.com -wordpress.com -smule.com"
+	exclusion = " -facebook.com -youtube.com -twitter.com -blogspot.com -pinterest.com -amazon.com -wordpress.com -smule.com -tumblr.com -instagram.com -scribd.com"
 
 	data =[]
 	url = 'https://bing.com/search?'

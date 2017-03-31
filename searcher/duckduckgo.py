@@ -32,7 +32,7 @@ def sanitize_url(url):
 	return redirect_url[0]
 
 def check_url(url):
-	exclusion = ["facebook.com", "youtube.com", "twitter.com", "blogspot.com", "pinterest.com", "amazon.com", "wordpress.com", "smule.com"]
+	exclusion = ["facebook.com", "youtube.com", "twitter.com", "blogspot.com", "pinterest.com", "amazon.com", "wordpress.com", "smule.com", "tumblr.com", "instagram.com", "scribd.com"]
 	for blacklist in exclusion:
 		if blacklist in url.lower():
 			return False

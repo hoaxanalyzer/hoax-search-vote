@@ -4,6 +4,7 @@ install_aliases()
 import logging
 import pickle
 import re
+import regex
 import urllib.parse
 from datetime import datetime
 from nltk.corpus import stopwords
@@ -26,56 +27,11 @@ class WordGram:
 		return regex
 
 class Article:
-	factgram = [WordGram(["not hoax", "bukan hoax"]), \
-				WordGram(["(?<!not\s)accurate", "(?<!tidak\s)akurat"]), \
-				#WordGram(["(?<!not\s)true", "(?<!tidak\s)benar"]), \
-				WordGram(["(?<!not\s)true", "fakta"]), \
-				WordGram(["(?<!no\s)proof", "bukti", "(?<!tidak\s)terbukti"]), \
-				WordGram(["scientific", "ilmiah"]), \
-				WordGram(["paper", "jurnal"]), \
-				WordGram(["study", "penelitian"]), \
-				WordGram(["source", "sumber"]), \
-				WordGram(["cited", "referensi"]), \
-				WordGram(["evidence", "kesaksian", "bukti", "saksi"]), \
-				WordGram(["official", "(?<!tidak\s)resmi"])]
+	factgram = [WordGram(["not hoax", "bukan hoax", "(?<!not\s)accurate", "(?<!tidak\s)akurat", "(?<!tidak\sditemukan\s)(?<!tidak\smenemukan\s)(?<!tidak\sber)hubungan", "fakta", "(?<!tidak\sada\s)referensi", "(?<!tidak\sada\s)kesaksian", "(?<!tidak\sada\s)saksi", "(?<!not\s)official(?!s)", "(?<!lembaga\s)(?<!tidak\s)resmi"])]
 
-	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan"]), \
-				WordGram(["like a hoax", "seperti hoax", "mirip hoax"]), \
-				WordGram(["(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya"]), \
-				WordGram(["a lie", "bohong", "kebohongan"]), \
-				WordGram(["rumor", "rumor", "isu"]), \
-				WordGram(["false", "tidak benar", "ditepis"]), \
-				WordGram(["in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya"]), \
-				WordGram(["fake news", "berita palsu", "berita yang tidak benar"]), \
-				WordGram(["debunked", "tidak terbukti", "terbukti salah"]), \
-				WordGram(["victim", "korban"]), \
-				WordGram(["conspiracy", "konspirasi"]), \
-				WordGram(["expect", "menyangka", "mengharapkan"]), \
-				WordGram(["uncertain", "tidak pasti", "samar"]), \
-				WordGram(["skeptical", "skeptis", "curiga", "ragu"]), \
-				WordGram(["satirical", "menyidir", "satir"]), \
-				WordGram(["death hoax", "hoax kematian"]), \
-				WordGram(["fake article", "artikel palsu"]), \
-				WordGram(["fake story", "cerita palsu"]), \
-				WordGram(["clickbait"]), \
-				WordGram(["fabricated"]), \
-				WordGram(["no truth", "tidak benar"]), \
-				WordGram(["no evidence", "tidak terbukti", "tidak ada bukti"]), \
-				WordGram(["incorrect", "tidak tepat", "membantah"]), \
-				WordGram(["satire", "menyindir", "satir"]), \
-				WordGram(["altered", "diubah"]), \
-				WordGram(["if this were true", "jika benar", "jika hal ini benar"]), \
-				WordGram(["if it was true", "jika benar", "jika ini benar"]), \
-				WordGram(["dont actually", "tidak benar-benar"]), \
-				WordGram(["nonsense", "omong kosong", "tidak masuk akal"]), \
-				WordGram(["no credible", "tidak kredibel", "tidak ada sumber"])]
+	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan", "mitos", "like a hoax", "seperti hoax", "mirip hoax", "(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya", "a lie", "bohong", "kebohongan", "pemalsuan", "penipuan", "rumor", "rumor", "isu", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya", "fake news", "berita palsu", "berita yang tidak benar", "debunked", "tidak terbukti", "terbukti salah", "dipatahkan", "victim", "korban", "conspiracy", "konspirasi", "kontroversi", "menyangka", "mengharapkan", "uncertain", "tidak pasti", "samar", "skeptical", "skeptis", "curiga", "ragu", "satirical", "menyidir", "satir", "death hoax", "hoax kematian", "fake article", "artikel palsu", "fake story", "cerita palsu", "clickbait", "fabricated", "no truth", "tidak benar", "no evidence", "tidak terbukti", "tidak ada bukti", "terbukti tidak", "belum ada bukti", "incorrect", "tidak tepat", "membantah", "satire", "menyindir", "satir", "altered", "diubah", "if this were true", "jika benar", "jika hal ini benar", "if it was true", "jika benar", "jika ini benar", "dont actually", "tidak benar-benar", "nonsense", "omong kosong", "tidak masuk akal", "no credible", "tidak kredibel", "tidak ada sumber", "terbukti tidak", "tidak terbukti", "tidak ada bukti", "belum ada bukti", "tidak menemukan bukti", "tidak ditemukan bukti", "bukan berdasarkan bukti", "tidak membuktikan", "tidak ada penelitian", "tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists", "dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity", "not been able to replicate", "implausible", "sempat dikabarkan", "error"])]
 
-	unkngram = [WordGram(["not clear", "tidak jelas"]), \
-				WordGram(["cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan"]), \
-				WordGram(["questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan"]), \
-				WordGram(["no answer", "tidak ada jawaban", "tidak menjawab", "tidak terjawab"]), \
-				WordGram(["confusing", "membingungkan"]), \
-				WordGram(["dont know", "tidak tau", "tidak mengerti"])]
+	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan", "questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan", "no answer", "tidak ada jawaban", "tidak menjawab", "tidak terjawab", "confusing", "membingungkan", "dont know", "tidak tau", "tidak mengerti", "orang dekat", "ayah dari", "ibu dari", "istri dari", "adik dari", "saudara dari"])]
 
 	sitedata = {}
 
@@ -198,8 +154,11 @@ class Article:
 	def _old_ngram_counter(self, ngrams, text):
 		counts = {}
 		for ngram in ngrams:
-			pattern = re.compile(ngram.pattern(), re.IGNORECASE)
-			counts[ngram.value] = len(pattern.findall(text))
+			counts[ngram.value] = 0
+		for ngram in ngrams:
+			#print(ngram.pattern())
+			pattern = regex.findall(ngram.pattern(), text.lower())
+			counts[ngram.value] += len(pattern)
 		return counts
 
 	def _ngram_counter(self, ngrams, sentences):
@@ -217,8 +176,9 @@ class Article:
 					has_qword = self.__is_has_word(epattern, sentences, sidx, 3)
 			if has_qword:
 				for ngram in ngrams:
-					pattern = re.compile(ngram.pattern(), re.IGNORECASE)
-					counts[ngram.value] += len(pattern.findall(sentence))
+					#print(ngram.pattern())
+					pattern = regex.findall(ngram.pattern(), sentence.lower())
+					counts[ngram.value] += len(pattern)
 			sidx += 1
 		return counts
 
@@ -262,5 +222,14 @@ class Article:
 		if domain in Article.sitedata:
 			if Article.sitedata[domain] == 'credible': return 2
 			else: return -2
-		else: return 0
+		else: return -1
 
+	def _ngrams(self, text, n):
+		text = text.split(' ')
+		output = {}
+		for i in range(len(text)-n+1):
+			g = ' '.join(text[i:i+n])
+			output.setdefault(g, 0)
+			output[g] += 1
+		return output
+ 
