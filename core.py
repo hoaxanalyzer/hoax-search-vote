@@ -47,7 +47,7 @@ class Analyzer:
 				else: return 3
 		elif (conclusion[2] < conclusion[1]):
 			if (conclusion[1] < 2): return 3
-			if (conclusion[2] < conclusion[1] * 2): return 1
+			if (conclusion[2] > conclusion[1] * 2): return 1
 			if ((conclusion[3] + conclusion[2]) < conclusion[1]): return 1
 			else:
 				if ((conclusion[3] + conclusion[2]) - conclusion[1] < THRESHOLD_UNKNOWN): return 1
