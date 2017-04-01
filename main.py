@@ -195,7 +195,7 @@ def callback():
 
 			line_bot_api.reply_message(
 				event.reply_token,
-				TextSendMessage(text="Please wait while we process that, this usually took less than a minute ^_^")
+				TextSendMessage(text="Please wait while we process that, this usually took a or two minute ^_^")
 			)
 
 			query = event.message.text			
@@ -205,8 +205,8 @@ def callback():
 			analyzer = Analyzer(query, extracted_query, client)
 			result = analyzer.do()
 
-			text_result = "The result is: " + result["conclusion"]
-			check_out = "Checkout more here: https://http://antihoax.azurewebsites.net/result/" + result["hash"]
+			text_result = "The result is " + result["conclusion"]
+			check_out = "Checkout more here https://antihoax.azurewebsites.net/result/" + result["id"]
 
 			line_bot_api.push_message(
 				profile_id,

@@ -209,10 +209,7 @@ class Article:
 		ddomain = domain.split('.')
 
 		clean_domain = ""
-		if len(ddomain) > 2: 
-			for d in ddomain[1:]: clean_domain += d + '.'
-		else: 
-			for d in ddomain[0:]: clean_domain += d + '.'
+		for d in ddomain[0:]: clean_domain += d + '.'
 
 		domain = ""
 		domain = clean_domain[:-1]
