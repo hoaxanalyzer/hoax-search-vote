@@ -27,7 +27,7 @@ from linebot.models import (
 	SourceUser, SourceGroup, SourceRoom,
 )
 
-from extractor import hoax_analyzer
+import query_builder
 import weka.core.jvm as jvm
 import searcher
 import config
@@ -44,8 +44,6 @@ CORS(application)
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-# curl -i -H "Content-Type: application/json" -X POST -d '{"query":"Richard Harrison Death"}' http://localhost:5000/analyze
-
 def detect_client():
 	client = {}
 	client['ip'] = '0.0.0.0'
@@ -58,6 +56,17 @@ def detect_client():
 
 	return client
 
+def create_text_query(query):
+	logging.info("Getting query: " + query)
+
+	extracted_query = query_builder.build_query_from_text(query)
+	extracted_query = extracted_query.strip()
+	extracted_query = extracted_query.lower()
+
+	logging.info("Extracted query: " + extracted_query)
+	result = json.loads(extracted_query)
+	return result["query"]
+
 @application.route("/")
 def index():
 	return "Hoax Analyzer - Search and Vote API"
@@ -69,14 +78,7 @@ def analyze():
 	query = request.json['query']
 	query = query.replace('\n', '')
 	
-	logging.info("Getting query: " + query)
-
-	extracted_query = hoax_analyzer.build_query(query)
-	extracted_query = extracted_query.strip()
-	extracted_query = extracted_query.lower()
-
-	logging.info("Extracted query: " + extracted_query)
-
+	extracted_query = create_text_query(query)
 	analyzer = Analyzer(query, extracted_query, client)
 	result = json.dumps(analyzer.do())
 	#except Exception as e:
@@ -91,11 +93,7 @@ def analyze_stream():
 			query = request.json['query']
 			query = query.replace('\n', '')
 			
-			logging.info("Getting query: " + query)
-
-			extracted_query = hoax_analyzer.build_query(query)
-			extracted_query = extracted_query.strip()
-			extracted_query = extracted_query.lower()
+			extracted_query = create_text_query(query)
 			analyzer = Analyzer(query, extracted_query, client)
 
 			return Response(analyzer.do_stream(), content_type='text/event-stream')
@@ -190,23 +188,21 @@ def callback():
 			profile_id = profile.user_id
 
 			client = {}
-			client['ip'] = '0.0.0.0'
+			client['ip'] = profile_id[:15]
 			client['browser'] = 'LINE BOT'
 
 			line_bot_api.reply_message(
 				event.reply_token,
-				TextSendMessage(text="Please wait while we process that, this usually took a or two minute ^_^")
+				TextSendMessage(text="Tunggu sebentar ya, kami akan menganalisis masukan Anda, biasanya tidak sampai 1 menit ^_^")
 			)
 
-			query = event.message.text			
-			extracted_query = hoax_analyzer.build_query(query)
-			extracted_query = extracted_query.strip()
-			extracted_query = extracted_query.lower()
+			query = event.message.text
+			extracted_query = create_text_query(query)
 			analyzer = Analyzer(query, extracted_query, client)
 			result = analyzer.do()
 
-			text_result = "The result is " + result["conclusion"]
-			check_out = "Checkout more here https://antihoax.azurewebsites.net/result/" + result["id"]
+			text_result = "Hasilnya adalah " + result["conclusion"]
+			check_out = "Informasi lebih lanjut dapat dilihat di https://antihoax.azurewebsites.net/result/" + result["id"]
 
 			line_bot_api.push_message(
 				profile_id,
