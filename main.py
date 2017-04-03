@@ -59,7 +59,7 @@ def create_text_query(query):
 	logging.info("Getting query: " + query)
 
 	try:
-		query = query.encode('utf-8')
+		query = str(query.encode('utf-8'))
 		payload = json.dumps({'text': query}).encode('utf8')
 		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
 		con = urllib.request.urlopen(req, timeout=20)
