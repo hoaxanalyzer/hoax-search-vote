@@ -8,6 +8,8 @@ import re
 import itertools
 import time
 
+import requests
+
 from core import Analyzer
 from core import Feedback
 from core import Management
@@ -27,12 +29,8 @@ from linebot.models import (
 	SourceUser, SourceGroup, SourceRoom,
 )
 
-import query_builder
-import weka.core.jvm as jvm
 import searcher
 import config
-
-jvm.start()
 
 channel_secret = config.line_channel_secret
 channel_access_token = config.line_channel_access_token
@@ -59,7 +57,7 @@ def detect_client():
 def create_text_query(query):
 	logging.info("Getting query: " + query)
 
-	extracted_query = query_builder.build_query_from_text(query)
+	extracted_query = requests.post("https://ah.lelah.ga/extract/text", json={'text': query})
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
 
@@ -202,7 +200,7 @@ def callback():
 			result = analyzer.do()
 
 			text_result = "Hasilnya adalah " + result["conclusion"]
-			check_out = "Informasi lebih lanjut dapat dilihat di https://antihoax.azurewebsites.net/result/" + result["id"]
+			check_out = "Informasi lebih lanjut dapat dilihat di https://antihoax.azurewebsites.net/results/" + result["id"]
 
 			line_bot_api.push_message(
 				profile_id,
