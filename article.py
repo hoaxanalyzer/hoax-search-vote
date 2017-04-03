@@ -68,10 +68,15 @@ class Article:
 		self.ofeature_unkn = self._old_ngram_counter(Article.unkngram, (self.content_clean))
 
 		if date == "None": date = "1950-01-01 00:00:00+00:00"
-		if len(str(date)) < 19:
-			date = datetime.strptime(date[:10], '%Y-%m-%d')
-		else:
-			date = datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
+		if date == "": date = "1950-01-01 00:00:00+00:00"
+		try:
+			if len(str(date)) < 19:
+				date = datetime.strptime(date[:10], '%Y-%m-%d')
+			else:
+				date = datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
+		except:
+			date = "1950-01-01 00:00:00+00:00"
+
 		self.date = date	    
 
 		self.similarity = 0

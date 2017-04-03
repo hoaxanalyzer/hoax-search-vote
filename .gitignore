@@ -6,3 +6,4 @@
 /data/*
 *.pyc
 config.py
+/models/generated_model.pkl

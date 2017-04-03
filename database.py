@@ -119,7 +119,7 @@ class Database:
 		return articles
 
 	def get_reference_by_qid(self, qid):
-		sql = "SELECT * FROM article_reference WHERE qid = '%s'" % (qid)
+		sql = "SELECT * FROM article_reference WHERE id = '%s'" % (qid)
 		self.cur.execute(sql)
 		self.conn.commit()
 		articles = []
