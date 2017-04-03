@@ -58,28 +58,33 @@ def detect_client():
 def create_text_query(query):
 	logging.info("Getting query: " + query)
 
-	payload = json.dumps({'text': query}).encode('utf8')
-	req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
-	con = urllib.request.urlopen(req)
-	result = json.loads(con.read().decode('utf-8'))
+	try:
+		payload = json.dumps({'text': query}).encode('utf8')
+		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
+		con = urllib.request.urlopen(req)
+		result = json.loads(con.read().decode('utf-8'))
 
-	extracted_query = result["query"]
-	extracted_query = extracted_query.strip()
-	extracted_query = extracted_query.lower()
+		extracted_query = result["query"]
+		extracted_query = extracted_query.strip()
+		extracted_query = extracted_query.lower()
+	except:
+		extracted_query = query
 
 	logging.info("Extracted query: " + extracted_query)
 	return extracted_query
 
 def create_image_query(image):
 	logging.info("Getting image")
-	print(image)
 	extracted_query = ""
+	try:
+		req = urllib.request.Request("http://10.30.31.12:8085/extract/image", image.read()) 
+		con = urllib.request.urlopen(req, timeout=20)
+		result = json.loads(con.read().decode('utf-8'))
 
-	req = urllib.request.Request("http://10.30.31.12:8085/extract/image", image.read()) 
-	con = urllib.request.urlopen(req, timeout=20)
-	result = json.loads(con.read().decode('utf-8'))
+		extracted_query = result["query"]
+	except:
+		extracted_query = ""
 
-	extracted_query = result["query"]
 	return extracted_query
 
 
@@ -103,25 +108,25 @@ def analyze():
 
 @application.route("/analyze/image", methods=['POST'])
 def analyze_image():
-	#try:
-	#client = detect_client()
-	if 'image' not in request.files:
-		return json.dumps({"status": "Failed", "message": "No image file found", "details": "No image file uploaded"})
+	try:
+		#client = detect_client()
+		if 'image' not in request.files:
+			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No image file uploaded"})
 
-	file = request.files['image']
-	if file.filename == '':
-		return json.dumps({"status": "Failed", "message": "No image file found", "details": "No filename"})
+		file = request.files['image']
+		if file.filename == '':
+			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No filename"})
 
-	if file:
-		extracted_query = create_image_query(file)
+		if file:
+			extracted_query = create_image_query(file)
 
-		if len(extracted_query) <= 2:
-			return json.dumps({"status": "Failed", "message": "No query extracted", "details": "No query extracted"})
-		
-		analyzer = Analyzer(extracted_query, extracted_query, None)
-		result = json.dumps(analyzer.do())
-	#except Exception as e:
-	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
+			if len(extracted_query) <= 2:
+				return json.dumps({"status": "Failed", "message": "No query extracted", "details": "No query extracted"})
+			
+			analyzer = Analyzer(extracted_query, extracted_query, None)
+			result = json.dumps(analyzer.do())
+	except Exception as e:
+		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/analyze/stream", methods=['POST'])
