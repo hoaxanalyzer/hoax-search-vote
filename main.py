@@ -59,9 +59,10 @@ def create_text_query(query):
 	logging.info("Getting query: " + query)
 
 	try:
+		query = query.encode('utf-8')
 		payload = json.dumps({'text': query}).encode('utf8')
 		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
-		con = urllib.request.urlopen(req)
+		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
 		extracted_query = result["query"]
@@ -77,7 +78,7 @@ def create_image_query(image):
 	logging.info("Getting image")
 	extracted_query = ""
 	try:
-		req = urllib.request.Request("http://10.30.31.12:8085/extract/image", image.read()) 
+		req = urllib.request.Request("https://ah.lelah.ga/extract/image", image.read()) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
