@@ -43,7 +43,7 @@ class Model:
 				print(str(qid) + "/" + str(length))
 
 				if not qid == None:
-					all_references = self.db.get_reference_by_qhash(qid)
+					all_references = self.db.get_reference_by_qid(qid)
 					already_hash = []
 
 					for feedback in feedbacks[qid]:

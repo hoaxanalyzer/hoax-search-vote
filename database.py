@@ -118,6 +118,21 @@ class Database:
 				articles.append(article)
 		return articles
 
+	def get_reference_by_qid(self, qid):
+		sql = "SELECT * FROM article_reference WHERE qid = '%s'" % (qid)
+		self.cur.execute(sql)
+		self.conn.commit()
+		articles = []
+		if (self.cur.rowcount > 0):
+			for row in self.cur.fetchall():
+				article = {}
+				article["hash"] = row["article_hash"]
+				article["date"] = row["article_date"]
+				article["url"] = row["article_url"]
+				article["content"] = row["article_content"]
+				articles.append(article)
+		return articles
+
 	def get_reference_feedback(self):
 		## VIWEW HELPER #1
 		sql = "CREATE OR REPLACE VIEW feedback_reference_result AS SELECT article_hash, is_relevant, feedback_label, COUNT(*) AS count FROM feedback_reference GROUP BY article_hash, is_relevant, feedback_label"
