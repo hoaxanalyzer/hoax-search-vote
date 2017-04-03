@@ -46,11 +46,15 @@ def search_all(query):
 	print(results)
 
 	def request_worker(result):
-		print("Getting article of " + result["url"])
-		req = urllib.request.Request(result["url"], headers={'User-Agent' : "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.0.1) Gecko/20020919"}) 
-		con = urllib.request.urlopen(req)
-		html = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
-		print("Finish getting article of " + result["url"])
+		html = ""
+		try:
+			print("Getting article of " + result["url"])
+			req = urllib.request.Request(result["url"], headers={'User-Agent' : "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.0.1) Gecko/20020919"}) 
+			con = urllib.request.urlopen(req)
+			html = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
+			print("Finish getting article of " + result["url"])
+		except:
+			None
 		return (result["title"], html, result["url"])
 
 	jobs = [gevent.spawn(request_worker, results[key]) for key in results]

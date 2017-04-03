@@ -42,29 +42,43 @@ class Model:
 
 				print(str(qid) + "/" + str(length))
 
-				for feedback in feedbacks[qid]:
-					## THE QUERY COULD RESULT IN INCONSISTENCY, PLEASE STANDARIZE: TEXT INPUT OR QUERY TO S.E.??
-					article = Article(feedback["query_search"], "None", "None", feedback["article_content"], "None")
-					if not feedback["is_relevant"] == "Related":
-						article.set_label("unrelated")
-					else:
-						article.set_label(feedback["feedback_label"].lower())
-					datasets.append(article)
-					sentences.append(article.content_clean)
+				if not qid == None:
+					all_references = self.db.get_reference_by_qhash(qid)
+					already_hash = []
 
-				# ATTETION HERE! CHANGE THE QUERY TO TEXT
-				#similar = Similar(self._get_query_hoax(), sentences)
-				similar = Similar(feedback["query_text"], sentences)
+					for feedback in feedbacks[qid]:
+						## THE QUERY COULD RESULT IN INCONSISTENCY, PLEASE STANDARIZE: TEXT INPUT OR QUERY TO S.E.??
+						article = Article(feedback["query_search"], "None", "None", feedback["article_content"], "None")
+						if not (feedback["is_relevant"] == "Related" or feedback["is_relevant"] == "Relevant"):
+							article.set_label("unrelated")
+						else:
+							article.set_label(feedback["feedback_label"].lower())
+						datasets.append(article)
+						sentences.append(article.content_clean)
+						already_hash.append(article.ahash)
 
-				for num, result in similar.rank:
-					article = datasets[num]
-					article.set_similarity(result)
-					l = "model,"
-					features = article.get_features_array()
-					for fea in features:
-						l += str(fea) + ","
-					l += article.label + "\n"
-					file.write(l)
+					## For similarity
+					for ref in all_references:
+						if ref["hash"] not in already_hash:
+							article = Article(feedback["query_search"], "None", "None", ref["content"], "None")
+							article.set_label("similarity")
+							datasets.append(article)
+							sentences.append(article.content_clean)
+
+					# ATTETION HERE! CHANGE THE QUERY TO TEXT
+					#similar = Similar(self._get_query_hoax(), sentences)
+					similar = Similar(feedback["query_text"], sentences)
+
+					for num, result in similar.rank:
+						if not datasets[num].label == "similarity":
+							article = datasets[num]
+							article.set_similarity(result)
+							l = "model,"
+							features = article.get_features_array()
+							for fea in features:
+								l += str(fea) + ","
+							l += article.label + "\n"
+							file.write(l)
 
 		df = self._get_data(self.csvlocation)
 		df2, targets = self._encode_target(df, "label")
