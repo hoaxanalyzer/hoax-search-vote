@@ -57,7 +57,8 @@ def detect_client():
 def create_text_query(query):
 	logging.info("Getting query: " + query)
 
-	extracted_query = requests.post("https://ah.lelah.ga/extract/text", json={'text': query})
+	req = requests.post("https://ah.lelah.ga/extract/text", json={'text': query})
+	extracted_query = json.loads(req.text)["query"]
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
 
