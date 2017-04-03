@@ -7,6 +7,7 @@ import json
 import re
 import itertools
 import time
+import urllib.request
 
 import requests
 
@@ -57,14 +58,17 @@ def detect_client():
 def create_text_query(query):
 	logging.info("Getting query: " + query)
 
-	req = requests.post("https://ah.lelah.ga/extract/text", json={'text': query})
-	extracted_query = json.loads(req.text)["query"]
+	payload = json.dumps({'text': query}).encode('utf8')
+	req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
+	con = urllib.request.urlopen(req)
+	result = json.loads(con.read().decode('utf-8'))
+
+	extracted_query = result["query"]
 	extracted_query = extracted_query.strip()
 	extracted_query = extracted_query.lower()
 
 	logging.info("Extracted query: " + extracted_query)
-	result = json.loads(extracted_query)
-	return result["query"]
+	return extracted_query
 
 @application.route("/")
 def index():
