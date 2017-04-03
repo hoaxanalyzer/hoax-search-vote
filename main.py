@@ -68,6 +68,11 @@ def create_text_query(query):
 		extracted_query = result["query"]
 		extracted_query = extracted_query.strip()
 		extracted_query = extracted_query.lower()
+		## MONKEY PATCH, PLEASE CONSIDER NOT DO THIS
+		extracted_query = extracted_query.replace('id', '')
+		extracted_query = extracted_query.replace('text', '')
+		extracted_query = extracted_query.replace('document', '')
+		extracted_query = extracted_query.replace('b', '')
 	except:
 		extracted_query = query
 

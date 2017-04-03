@@ -35,13 +35,17 @@ def search_all(query):
 	pool = ThreadPool(processes=2)
 	multiple_results = [pool.apply_async(worker, (s, query)) for s in engine]
 	temp_result = ([res.get(timeout=20) for res in multiple_results])
+
+	counter = 0
 	for s in temp_result:
 		for se in s:
-			se["title"] = ''.join([x for x in se["title"] if ord(x) < 128])
-			url = se["url"]
-			if not url[:4] == "http":
-				se["url"] = "http://" + url
-			results[hashlib.sha1(se["url"].encode()).hexdigest()] = se
+			if (counter <= 20):
+				se["title"] = '	'.join([x for x in se["title"] if ord(x) < 128])
+				url = se["url"]
+				if not url[:4] == "http":
+					se["url"] = "http://" + url
+				results[hashlib.sha1(se["url"].encode()).hexdigest()] = se
+				counter += 1
 
 	print(results)
 
@@ -53,8 +57,8 @@ def search_all(query):
 			con = urllib.request.urlopen(req)
 			html = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
 			print("Finish getting article of " + result["url"])
-		except:
-			None
+		except Exception as e:
+			print("Exception: " + e)
 		return (result["title"], html, result["url"])
 
 	jobs = [gevent.spawn(request_worker, results[key]) for key in results]
@@ -103,7 +107,7 @@ def search_all(query):
 		pool = ThreadPool(processes=process)
 		multiple_results = [pool.apply_async(worker, (site[1], site[0], site[2],)) for site in sites]
 
-		return ([res.get() for res in multiple_results])
+		return ([res.get(timeout=100) for res in multiple_results])
 	except Exception as e:
 		print(str(e))
 		return []

@@ -226,8 +226,11 @@ class Analyzer:
 
 		query_uuid = uuid.uuid4().hex
 		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
+		print("Search for all")
 		dataset = s.search_all()
 
+		print(dataset)
+		print("Going to conclusion")
 		conclusion = self._get_conclusion(dataset)
 		ridx = self.__do_voting(conclusion)
 		references = self.__get_references(dataset, Analyzer.target[ridx])
