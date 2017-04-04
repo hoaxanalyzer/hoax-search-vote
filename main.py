@@ -85,16 +85,18 @@ def create_text_query(query):
 def create_image_query(image):
 	logging.info("Getting image")
 	extracted_query = ""
+	text = "error"
 	try:
 		req = urllib.request.Request("https://ah.lelah.ga/extract/image", image.read()) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
 		extracted_query = result["query"]
+		text = result["text"]
 	except:
 		extracted_query = ""
 
-	return extracted_query
+	return (extracted_query, text)
 
 
 @application.route("/")
@@ -129,12 +131,12 @@ def analyze_image():
 			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No filename"})
 
 		if file:
-			extracted_query = create_image_query(file)
+			extracted_query, text = create_image_query(file)
 
 			if len(extracted_query) <= 2:
 				return json.dumps({"status": "Failed", "message": "No query extracted", "details": "No query extracted"})
 			
-			analyzer = Analyzer(extracted_query, extracted_query, None)
+			analyzer = Analyzer(text, extracted_query, None)
 			result = json.dumps(analyzer.do())
 	except Exception as e:
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
