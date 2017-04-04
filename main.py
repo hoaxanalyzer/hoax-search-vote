@@ -62,7 +62,7 @@ def create_text_query(query):
 	logging.info("Getting query: " + query)
 
 	try:
-		query = str(query.encode('utf-8'))
+		query = (query.encode('utf-8')).decode('utf-8')
 		payload = json.dumps({'text': query}).encode('utf8')
 		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
 		con = urllib.request.urlopen(req, timeout=20)
@@ -71,11 +71,6 @@ def create_text_query(query):
 		extracted_query = result["query"]
 		extracted_query = extracted_query.strip()
 		extracted_query = extracted_query.lower()
-		## MONKEY PATCH, PLEASE CONSIDER NOT DO THIS
-		extracted_query = extracted_query.replace('id', '')
-		extracted_query = extracted_query.replace('text', '')
-		extracted_query = extracted_query.replace('document', '')
-		extracted_query = extracted_query.replace('b', '')
 	except:
 		extracted_query = query
 
