@@ -140,7 +140,7 @@ class Analyzer:
 				data["url"] = r.url
 				data["url_base"] = r.url_base
 				data["label"] = r.label
-				data["text"] = r.content
+				data["text"] = r.content[:900] + "... (see more at source)"
 				data["id"] = r.ahash
 				data["site_score"] = r.url_score
 				data["feature"] = str(r.get_humanize_feature())
@@ -195,7 +195,7 @@ class Analyzer:
 			data["url"] = r.url
 			data["url_base"] = r.url_base
 			data["label"] = r.label
-			data["text"] = r.content
+			data["text"] = r.content[:900] + "... (see more at source)"
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
 			data["feature"] = str(r.get_humanize_feature())
@@ -241,7 +241,7 @@ class Analyzer:
 			data["url"] = r.url
 			data["url_base"] = r.url_base
 			data["label"] = r.label
-			data["text"] = r.content
+			data["text"] = r.content[:900] + "... (see more at source)"
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
 			data["feature"] = str(r.get_humanize_feature())
