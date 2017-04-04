@@ -48,10 +48,13 @@ def detect_client():
 	client['ip'] = '0.0.0.0'
 	client['browser'] = 'Undetected'
 
-	if 'ip' in request.json:
-		client['ip'] = request.json['ip']
-	if 'browser' in request.json:
-		client['browser'] = request.json['browser']
+	try:
+		if 'ip' in request.json:
+			client['ip'] = request.json['ip']
+		if 'browser' in request.json:
+			client['browser'] = request.json['browser']
+	except:
+		logging.info("Client data not found")
 
 	return client
 
@@ -116,6 +119,8 @@ def analyze():
 def analyze_image():
 	try:
 		#client = detect_client()
+		print(request.files)
+
 		if 'image' not in request.files:
 			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No image file uploaded"})
 
@@ -153,14 +158,14 @@ def analyze_stream():
 
 @application.route("/result", methods=['POST'])
 def result():
-	try:
-		client = detect_client()
-		quuid = request.json['id']
-		
-		analyzer = Analyzer("", "", client)
-		result = json.dumps(analyzer.retrieve(quuid))
-	except Exception as e:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
+	#try:
+	client = detect_client()
+	quuid = request.json['id']
+	
+	analyzer = Analyzer("", "", client)
+	result = json.dumps(analyzer.retrieve(quuid))
+	#except Exception as e:
+	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
 @application.route("/feedback/result", methods=['POST'])
