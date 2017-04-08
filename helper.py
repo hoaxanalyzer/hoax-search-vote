@@ -36,6 +36,7 @@ class Searcher:
 			self.query = self.query.replace(w, ' ')
 
 		self.query = self.query[:100]
+		self.query = self.query.strip()
 		self.query_exc = ' -youtube -wikipedia -amazon -wordpress -blogspot -facebook -twitter -pinterest -google'
 
 		self.query_hash = hashlib.sha256((self.query).encode('utf-8')).hexdigest()

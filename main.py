@@ -62,6 +62,8 @@ def create_text_query(query):
 	logging.info("Getting query: " + query)
 
 	try:
+		query = query.replace('\n', ' ').replace('\r', ' ')
+		query = ''.join([i if ord(i) < 128 else ' ' for i in query])
 		query = (query.encode('utf-8')).decode('utf-8')
 		payload = json.dumps({'text': query}).encode('utf8')
 		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
