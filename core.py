@@ -98,18 +98,29 @@ class Analyzer:
 			for num, result in similar.rank:
 				article = dataset[num]
 				article.set_similarity(result)
+				article.count_query_appeared(self.text)
 
 				counts = article.get_category_count()
-				if len(article.content) < 400:
+				if article.similarity < 0.045:
+					idx = 0
+				elif article.feature_query_percentage < 0.45:
+					idx = 0
+				elif len(article.content) < 400:
 					idx = 3
-				elif article.similarity < 0.045:
-					idx = 3
-				elif counts[1] == 0 and counts[0] == 0:
+				elif counts[1] == 0 and counts[0] == 0 and counts[3] < 20:
 					idx = 1
+				elif counts[1] == 0 and counts[0] == 0 and counts[3] >= 20:
+					idx = 3
 				elif counts[0] > counts[1] * 2.5:
 					idx = 2
 				elif counts[1] > counts[0] * 2.5:
 					idx = 1
+				elif (article.feature_query_percentage > 0.95) and (article.feature_query_count <= 10):
+					idx = 0
+				elif (article.similarity < 0.35) and (article.feature_query_count < 2):
+					idx = 0
+				elif (article.similarity < 0.25) and (article.feature_query_count < 5):
+					idx = 0
 				else:
 					idx = clf.predict([article.get_features_array()])[0]
 

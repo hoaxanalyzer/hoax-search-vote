@@ -34,7 +34,7 @@ class Model:
 		feedbacks = self.db.get_reference_feedback()
 
 		with open(self.csvlocation, 'w') as file:
-			file.write("desc,fea1,fea2,fea3,fea21,fea22,fea23,similarity,label\n")
+			file.write("desc,fea1,fea2,fea3,fea4,fea21,fea22,fea23,fea24,similarity,qcount,qperct,label\n")
 			length = len(feedbacks)
 			for qid in feedbacks:
 				datasets = []
@@ -73,6 +73,7 @@ class Model:
 						if not datasets[num].label == "similarity":
 							article = datasets[num]
 							article.set_similarity(result)
+							article.count_query_appeared(feedback["query_text"])
 							l = "model,"
 							features = article.get_features_array()
 							for fea in features:
@@ -84,13 +85,13 @@ class Model:
 		df2, targets = self._encode_target(df, "label")
 
 		print(targets)
-		features = list(df2.columns[:7])
+		features = list(df2.columns[:11])
 		print("* features:", features)
 
 		y = df2["target"]
 		X = df2[features]
 
-		clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(50,25), random_state=1)
+		clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(12,6), random_state=1)
 		clf.fit(X, y)
 
 		joblib.dump(clf, self.modellocation) 

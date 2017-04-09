@@ -32,6 +32,8 @@ class Article:
 	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan", "mitos", "like a hoax", "seperti hoax", "mirip hoax", "(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya", "a lie", "bohong", "kebohongan", "pemalsuan", "penipuan", "rumor", "rumor", "isu", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya", "fake news", "berita palsu", "berita yang tidak benar", "debunked", "tidak terbukti", "terbukti salah", "dipatahkan", "conspiracy", "konspirasi", "kontroversi", "menyangka", "mengharapkan", "uncertain", "tidak pasti", "samar", "skeptical", "skeptis", "curiga", "ragu", "satirical", "menyidir", "satir", "death hoax", "hoax kematian", "fake article", "artikel palsu", "fake story", "cerita palsu", "clickbait", "fabricated", "no truth", "tidak benar", "no evidence", "tidak terbukti", "tidak ada bukti", "terbukti tidak", "belum ada bukti", "incorrect", "tidak tepat", "membantah", "satire", "menyindir", "satir", "altered", "diubah", "if this were true", "jika benar", "jika hal ini benar", "if it was true", "jika benar", "jika ini benar", "dont actually", "tidak benar-benar", "nonsense", "omong kosong", "tidak masuk akal", "no credible", "tidak kredibel", "tidak ada sumber", "terbukti tidak", "tidak terbukti", "tidak ada bukti", "belum ada bukti", "tidak menemukan bukti", "tidak ditemukan bukti", "bukan berdasarkan bukti", "tidak membuktikan", "tidak ada penelitian", "tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists", "dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity", "not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop"])]
 
 	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan", "questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan", "no answer", "tidak ada jawaban", "tidak menjawab", "tidak terjawab", "confusing", "membingungkan", "dont know", "tidak tau", "tidak mengerti", "orang dekat", "ayah dari", "ibu dari", "istri dari", "adik dari", "saudara dari"])]
+	
+	asmpgram = [WordGram(["if", "might", "consider", "when will", "what if"])]
 
 	sitedata = {}
 
@@ -56,16 +58,22 @@ class Article:
 		self.url_score = self._site_type(url)
 		
 		self.content = content
+		self.content = re.sub(r"\t", '', self.content)
 		self.content_clean = re.sub(r"[^\w\s]|_+", ' ', self.content.lower())
 		
 		sentences = self._get_sentences(self.content)
-		self.feature_fact = self._ngram_counter(Article.factgram, sentences)
-		self.feature_hoax = self._ngram_counter(Article.hoaxgram, sentences)
-		self.feature_unkn = self._ngram_counter(Article.unkngram, sentences)
+		self.feature_fact = self._ngram_counter(Article.factgram, sentences, 3)
+		self.feature_hoax = self._ngram_counter(Article.hoaxgram, sentences, 3)
+		self.feature_unkn = self._ngram_counter(Article.unkngram, sentences, 3)
+		self.feature_asmp = self._ngram_counter(Article.asmpgram, sentences, 0)
 
 		self.ofeature_fact = self._old_ngram_counter(Article.factgram, (self.content_clean))
 		self.ofeature_hoax = self._old_ngram_counter(Article.hoaxgram, (self.content_clean))
 		self.ofeature_unkn = self._old_ngram_counter(Article.unkngram, (self.content_clean))
+		self.ofeature_asmp = self._old_ngram_counter(Article.asmpgram, (self.content_clean))
+
+		self.feature_query_count = 0
+		self.feature_query_percentage = 0
 
 		if date == "None": date = "1950-01-01 00:00:00+00:00"
 		if date == '': date = "1950-01-01 00:00:00+00:00"
@@ -102,6 +110,8 @@ class Article:
 			features.append(self.ofeature_fact[f.value])
 		for u in Article.unkngram:
 			features.append(self.ofeature_unkn[u.value])
+		for a in Article.asmpgram:
+			features.append(self.ofeature_asmp[a.value])
 		## NEW
 		for h in Article.hoaxgram:
 			features.append(self.feature_hoax[h.value])
@@ -109,7 +119,11 @@ class Article:
 			features.append(self.feature_fact[f.value])
 		for u in Article.unkngram:
 			features.append(self.feature_unkn[u.value])
+		for a in Article.asmpgram:
+			features.append(self.feature_asmp[a.value])
 		features.append(self.similarity)
+		features.append(self.feature_query_count)
+		features.append(self.feature_query_percentage)
 		return features
 
 	def get_category_count(self):
@@ -135,6 +149,11 @@ class Article:
 			unkn += (self.feature_unkn[u.value])
 		category.append(unkn)
 
+		asmp = 0
+		for a in Article.asmpgram:
+			asmp += (self.feature_asmp[a.value])
+		category.append(asmp)
+
 		return category
 
 	def get_humanize_feature(self):
@@ -146,6 +165,8 @@ class Article:
 			features['1' + f.value] = self.ofeature_fact[f.value]
 		for u in Article.unkngram:
 			features['1' + u.value] = self.ofeature_unkn[u.value]
+		for a in Article.asmpgram:
+			features['1' + a.value] = self.ofeature_asmp[a.value]
 		## NEW
 		for h in Article.hoaxgram:
 			features['2' + h.value] = self.feature_hoax[h.value]
@@ -153,8 +174,35 @@ class Article:
 			features['2' + f.value] = self.feature_fact[f.value]
 		for u in Article.unkngram:
 			features['2' + u.value] = self.feature_unkn[u.value]
+		for a in Article.asmpgram:
+			features['2' + a.value] = self.feature_asmp[a.value]
 		features["similarity"] = self.similarity
+		features["query_count"] = self.feature_query_count
+		features["query_percentage"] = self.feature_query_percentage
 		return features		
+
+	def count_query_appeared(self, querypure):
+		## This is counting that the query apeared near each other
+		text = self.content_clean
+		queryclean = re.sub(r"[^\w\s]|_+", ' ', querypure.lower())
+		querywords = queryclean.split()
+
+		total = 0
+		appeared = 0
+		counts = {}
+		for word in querywords:
+			counts[word] = 0
+			words = word.rsplit()
+			regexpat = r'%s' % "\s+".join(words)
+			pattern = regex.findall(regexpat, text.lower())
+			ln = len(pattern)
+			counts[word] = ln
+			total += ln
+			if ln > 0:
+				appeared += 1
+
+		self.feature_query_count = total / len(querywords)
+		self.feature_query_percentage = appeared / len(querywords)
 
 	def _old_ngram_counter(self, ngrams, text):
 		counts = {}
@@ -166,7 +214,7 @@ class Article:
 			counts[ngram.value] += len(pattern)
 		return counts
 
-	def _ngram_counter(self, ngrams, sentences):
+	def _ngram_counter(self, ngrams, sentences, r):
 		counts = {}
 		for ngram in ngrams:
 			counts[ngram.value] = 0
@@ -178,7 +226,7 @@ class Article:
 				if not has_qword and len(qword) > 1:
 					word = qword.rsplit()
 					epattern = re.compile(r'%s' % "\s+".join(word), re.IGNORECASE)
-					has_qword = self.__is_has_word(epattern, sentences, sidx, 3)
+					has_qword = self.__is_has_word(epattern, sentences, sidx, r)
 			if has_qword:
 				for ngram in ngrams:
 					#print(ngram.pattern())
