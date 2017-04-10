@@ -305,13 +305,22 @@ class Article:
 
 		domain = ""
 		domain = clean_domain[:-1]
+
+		onesub = '.'.join(domain.split(".")[1:])
+
 		self.url_base = domain
 
+		score = 0
 		## Make more punishing for non-credible sites
 		if domain in Article.sitedata:
-			if Article.sitedata[domain] == 'credible': return 2
-			else: return -2
-		else: return -0.5
+			if Article.sitedata[domain] == 'credible': score = 2
+			else: score = -2
+		elif onesub in Article.sitedata: 
+			if Article.sitedata[onesub] == 'credible': score = 2
+			else: score = -2			
+		else: score = -1
+
+		return score
 
 	def _ngrams(self, text, n):
 		text = text.split(' ')

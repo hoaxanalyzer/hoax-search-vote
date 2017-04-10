@@ -36,9 +36,12 @@ class Analyzer:
 	    [ulist.append(x) for x in l if x not in ulist]
 	    return ulist
 
-	def __do_voting(self, conclusion):
+	def __do_voting(self, conclusion, cfact, choax):
 		THRESHOLD_UNKNOWN = 0.35
-		#if (conclusion[0] > (conclusion[1] + conclusion[2] + conclusion[3])): return 3
+		## Credible News
+		if cfact > 2 and cfact > choax: return 1
+		if choax > 2 and choax > cfact: return 2
+
 		if (abs(conclusion[1] - conclusion[2]) < 0.5): return 3
 		if ((conclusion[1] == 0) and (not conclusion[2] == 0)):
 			if (conclusion[2] < 2.5): return 3
@@ -88,6 +91,8 @@ class Analyzer:
 
 	def _get_conclusion(self, dataset):
 		conclusion = [0] * 4
+		cfact = 0
+		choax = 0
 
 		if len(dataset) > 2:
 			dataset = self.__calculate_weight(dataset)
@@ -101,6 +106,8 @@ class Analyzer:
 			similar = Similar(self.text, sentences)
 			clf = joblib.load('./models/generated_model.pkl') 
 			i = 0
+
+
 
 			for num, result in similar.rank:
 				article = dataset[num]
@@ -132,12 +139,16 @@ class Analyzer:
 					idx = clf.predict([article.get_features_array()])[0]
 
 				article.set_label(Analyzer.target[idx])
-				conclusion[idx] += 1
-				if idx != 0: conclusion[idx] += article.weight
+				conclusion[idx] += 1 + article.weight
+				if article.url_score >= 2:
+					if idx == 1:
+						cfact += 1
+					elif idx == 2:
+						choax += 1
 
 				i += 1
 
-		return conclusion
+		return (conclusion, cfact, choax)
 
 	def retrieve(self, loghash):
 		query = self.db.get_query_by_loghash(loghash)
@@ -148,8 +159,8 @@ class Analyzer:
 			s = Searcher(self.query)
 			dataset = s.get_news(query["query_hash"])
 
-			conclusion = self._get_conclusion(dataset)
-			ridx = self.__do_voting(conclusion)
+			conclusion, cfact, choax = self._get_conclusion(dataset)
+			ridx = self.__do_voting(conclusion, cfact, choax)
 			references = self.__get_references(dataset, Analyzer.target[ridx])
 
 			lor = []
@@ -183,55 +194,55 @@ class Analyzer:
 			result["message"] = "Query not found"
 		return result
 		
-	def do_stream(self):
-		dataset = []
+	# def do_stream(self):
+	# 	dataset = []
 
-		yield "{'step':0, 'total':2, 'message':'Initializing'}\n"
-		time.sleep(.1)
-		s = Searcher(self._get_query_hoax())
+	# 	yield "{'step':0, 'total':2, 'message':'Initializing'}\n"
+	# 	time.sleep(.1)
+	# 	s = Searcher(self._get_query_hoax())
 
-		if not "ip" in list(self.client.keys()):
-			self.client["ip"] = "unknown"
-		if not "browser" in list(self.client.keys()):
-			self.client["browser"] = "unknown"
+	# 	if not "ip" in list(self.client.keys()):
+	# 		self.client["ip"] = "unknown"
+	# 	if not "browser" in list(self.client.keys()):
+	# 		self.client["browser"] = "unknown"
 
-		query_uuid = uuid.uuid4().hex
-		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
+	# 	query_uuid = uuid.uuid4().hex
+	# 	s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
 		
-		yield "{'step':1, 'total':2, 'message':'Search for data'}\n"
-		time.sleep(.1)
-		dataset = s.search_all()
+	# 	yield "{'step':1, 'total':2, 'message':'Search for data'}\n"
+	# 	time.sleep(.1)
+	# 	dataset = s.search_all()
 
-		yield "{'step':2, 'total':2, 'message':'Determining conclusion'}\n"
-		time.sleep(.1)
-		conclusion = self._get_conclusion(dataset)
-		ridx = self.__do_voting(conclusion)
-		references = self.__get_references(dataset, Analyzer.target[ridx])
+	# 	yield "{'step':2, 'total':2, 'message':'Determining conclusion'}\n"
+	# 	time.sleep(.1)
+	# 	conclusion = self._get_conclusion(dataset)
+	# 	ridx = self.__do_voting(conclusion)
+	# 	references = self.__get_references(dataset, Analyzer.target[ridx])
 
-		lor = []
-		for r in references:
-			data = {}
-			data["url"] = r.url
-			data["url_base"] = r.url_base
-			data["label"] = r.label
-			data["text"] = r.content[:900] + "... (see more at source)"
-			data["id"] = r.ahash
-			data["site_score"] = r.url_score
-			data["feature"] = str(r.get_humanize_feature())
-			data["counts"] = str(r.get_category_count())
-			lor.append(data)
+	# 	lor = []
+	# 	for r in references:
+	# 		data = {}
+	# 		data["url"] = r.url
+	# 		data["url_base"] = r.url_base
+	# 		data["label"] = r.label
+	# 		data["text"] = r.content[:900] + "... (see more at source)"
+	# 		data["id"] = r.ahash
+	# 		data["site_score"] = r.url_score
+	# 		data["feature"] = str(r.get_humanize_feature())
+	# 		data["counts"] = str(r.get_category_count())
+	# 		lor.append(data)
 
-		result = {}
-		result["query"] = self.query
-		result["hash"] = s.query_hash
-		result["conclusion"] = Analyzer.target[ridx]
-		result["scores"] = conclusion
-		result["references"] = lor
-		result["status"] = "Success"
-		result["id"] = query_uuid
+	# 	result = {}
+	# 	result["query"] = self.query
+	# 	result["hash"] = s.query_hash
+	# 	result["conclusion"] = Analyzer.target[ridx]
+	# 	result["scores"] = conclusion
+	# 	result["references"] = lor
+	# 	result["status"] = "Success"
+	# 	result["id"] = query_uuid
 
-		self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
-		yield json.dumps(result)
+	# 	self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
+	# 	yield json.dumps(result)
 
 	def do(self):
 		dataset = []
@@ -250,8 +261,8 @@ class Analyzer:
 
 		print(dataset)
 		print("Going to conclusion")
-		conclusion = self._get_conclusion(dataset)
-		ridx = self.__do_voting(conclusion)
+		conclusion, cfact, choax = self._get_conclusion(dataset)
+		ridx = self.__do_voting(conclusion, cfact, choax)
 		references = self.__get_references(dataset, Analyzer.target[ridx])
 
 		lor = []
