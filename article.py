@@ -27,11 +27,33 @@ class WordGram:
 		return regex
 
 class Article:
-	factgram = [WordGram(["not hoax", "bukan hoax", "(?<!not\s)accurate", "(?<!tidak\s)akurat", "(?<!tidak\sditemukan\s)(?<!tidak\smenemukan\s)(?<!tidak\sber)hubungan", "fakta", "(?<!tidak\sada\s)referensi", "(?<!tidak\sada\s)kesaksian", "(?<!tidak\sada\s)saksi", "(?<!not\s)official(?!s)", "(?<!lembaga\s)(?<!tidak\s)resmi"])]
+	factgram = [WordGram(["not hoax", "bukan hoax", "(?<!not\s)accurate", "(?<!tidak\s)akurat",\
+		"(?<!tidak\sditemukan\s)(?<!tidak\smenemukan\s)(?<!tidak\sber)hubungan", "fakta",\
+		"(?<!tidak\sada\s)referensi", "(?<!tidak\sada\s)kesaksian", "(?<!tidak\sada\s)saksi",\
+		"(?<!not\s)official(?!s)", "(?<!lembaga\s)(?<!tidak\s)resmi"])]
 
-	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan", "mitos", "like a hoax", "seperti hoax", "mirip hoax", "(?<!not\s)fake", "penipuan", "tipuan", "palsu", "memperdaya", "a lie", "bohong", "kebohongan", "pemalsuan", "penipuan", "rumor", "rumor", "isu", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya", "sesungguhnya", "sebetulnya", "fake news", "berita palsu", "berita yang tidak benar", "debunked", "tidak terbukti", "terbukti salah", "dipatahkan", "conspiracy", "konspirasi", "kontroversi", "menyangka", "mengharapkan", "uncertain", "tidak pasti", "samar", "skeptical", "skeptis", "curiga", "ragu", "satirical", "menyidir", "satir", "death hoax", "hoax kematian", "fake article", "artikel palsu", "fake story", "cerita palsu", "clickbait", "fabricated", "no truth", "tidak benar", "no evidence", "tidak terbukti", "tidak ada bukti", "terbukti tidak", "belum ada bukti", "incorrect", "tidak tepat", "membantah", "satire", "menyindir", "satir", "altered", "diubah", "if this were true", "jika benar", "jika hal ini benar", "if it was true", "jika benar", "jika ini benar", "dont actually", "tidak benar-benar", "nonsense", "omong kosong", "tidak masuk akal", "no credible", "tidak kredibel", "tidak ada sumber", "terbukti tidak", "tidak terbukti", "tidak ada bukti", "belum ada bukti", "tidak menemukan bukti", "tidak ditemukan bukti", "bukan berdasarkan bukti", "tidak membuktikan", "tidak ada penelitian", "tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists", "dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity", "not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop"])]
+	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan",\
+		"mitos", "like a hoax", "seperti hoax", "mirip hoax", "(?<!not\s)fake", "penipuan", "tipuan",\
+		"palsu", "memperdaya", "a lie", "bohong", "kebohongan", "pemalsuan", "penipuan", "rumor", "rumor",\
+		"isu", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya",\
+		"sesungguhnya", "sebetulnya", "fake news", "berita palsu", "berita yang tidak benar", "debunked",\
+		"tidak terbukti", "terbukti salah", "dipatahkan", "conspiracy", "konspirasi", "kontroversi", "menyangka",\
+		"mengharapkan", "uncertain", "tidak pasti", "samar", "skeptical", "skeptis", "curiga", "ragu", "satirical",\
+		"menyidir", "satir", "death hoax", "hoax kematian", "fake article", "artikel palsu", "fake story", "cerita palsu",\
+		"clickbait", "fabricated", "no truth", "tidak benar", "no evidence", "tidak terbukti", "tidak ada bukti",\
+		"terbukti tidak", "belum ada bukti", "incorrect", "tidak tepat", "membantah", "satire", "menyindir", "satir",\
+		"altered", "diubah", "if this were true", "jika benar", "jika hal ini benar", "if it was true", "jika benar",\
+		"jika ini benar", "dont actually", "tidak benar-benar", "nonsense", "omong kosong", "tidak masuk akal", "no credible",\
+		"tidak kredibel", "tidak ada sumber", "terbukti tidak", "tidak terbukti", "tidak ada bukti", "belum ada bukti",\
+		"tidak menemukan bukti", "tidak ditemukan bukti", "bukan berdasarkan bukti", "tidak membuktikan", "tidak ada penelitian",\
+		"tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists",\
+		"dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity",\
+		"no direct correlation", "no correlation", "disreputable", "to tarnish",\
+		"not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop"])]
 
-	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan", "questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan", "no answer", "tidak ada jawaban", "tidak menjawab", "tidak terjawab", "confusing", "membingungkan", "dont know", "tidak tau", "tidak mengerti", "orang dekat", "ayah dari", "ibu dari", "istri dari", "adik dari", "saudara dari"])]
+	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan",\
+		"questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan", "no answer", "tidak ada jawaban",\
+		"tidak menjawab", "tidak terjawab", "confusing", "membingungkan", "dont know", "tidak tau", "tidak mengerti", "orang dekat", "ayah dari", "ibu dari", "istri dari", "adik dari", "saudara dari"])]
 	
 	asmpgram = [WordGram(["if", "might", "consider", "when will", "what if"])]
 
@@ -47,7 +69,7 @@ class Article:
 
 		# Delete english stopword 
 		# TO-DO indonesian stopword
-		allstopwords = stopwords.words('english') + Article.factgram + Article.hoaxgram
+		allstopwords = stopwords.words('english')
 		self.query_words = [word for word in self.query_clean.split() if word not in allstopwords]
 		#print(self.query_words)
 
@@ -61,11 +83,11 @@ class Article:
 		self.content = re.sub(r"\t", '', self.content)
 		self.content_clean = re.sub(r"[^\w\s]|_+", ' ', self.content.lower())
 		
-		sentences = self._get_sentences(self.content)
-		self.feature_fact = self._ngram_counter(Article.factgram, sentences, 3)
-		self.feature_hoax = self._ngram_counter(Article.hoaxgram, sentences, 3)
-		self.feature_unkn = self._ngram_counter(Article.unkngram, sentences, 3)
-		self.feature_asmp = self._ngram_counter(Article.asmpgram, sentences, 0)
+		self.sentences = self._get_sentences(self.content)
+		self.feature_fact = self._ngram_counter(Article.factgram, self.sentences, 3)
+		self.feature_hoax = self._ngram_counter(Article.hoaxgram, self.sentences, 3)
+		self.feature_unkn = self._ngram_counter(Article.unkngram, self.sentences, 3)
+		self.feature_asmp = self._ngram_counter(Article.asmpgram, self.sentences, 0)
 
 		self.ofeature_fact = self._old_ngram_counter(Article.factgram, (self.content_clean))
 		self.ofeature_hoax = self._old_ngram_counter(Article.hoaxgram, (self.content_clean))
@@ -74,6 +96,7 @@ class Article:
 
 		self.feature_query_count = 0
 		self.feature_query_percentage = 0
+		self.feature_query_onesen = 0
 
 		if date == "None": date = "1950-01-01 00:00:00+00:00"
 		if date == '': date = "1950-01-01 00:00:00+00:00"
@@ -124,6 +147,7 @@ class Article:
 		features.append(self.similarity)
 		features.append(self.feature_query_count)
 		features.append(self.feature_query_percentage)
+		features.append(self.feature_query_onesen)
 		return features
 
 	def get_category_count(self):
@@ -179,13 +203,16 @@ class Article:
 		features["similarity"] = self.similarity
 		features["query_count"] = self.feature_query_count
 		features["query_percentage"] = self.feature_query_percentage
+		features["query_onesen"] = self.feature_query_onesen
 		return features		
 
 	def count_query_appeared(self, querypure):
+		allstopwords = stopwords.words('english')
 		## This is counting that the query apeared near each other
 		text = self.content_clean
 		queryclean = re.sub(r"[^\w\s]|_+", ' ', querypure.lower())
 		querywords = queryclean.split()
+		querywords = [word for word in querywords if word not in allstopwords]
 
 		total = 0
 		appeared = 0
@@ -203,6 +230,18 @@ class Article:
 
 		self.feature_query_count = total / len(querywords)
 		self.feature_query_percentage = appeared / len(querywords)
+		self.feature_query_onesen = 0
+
+		for sentence in self.sentences:
+			counter = 0
+			for word in querywords:
+				if word in sentence:
+					counter += 1
+			if len(querywords) <= 3:
+				if counter == len(querywords):
+					self.feature_query_onesen += 1
+			elif (counter/len(querywords)) > 0.55:
+				self.feature_query_onesen += 1
 
 	def _old_ngram_counter(self, ngrams, text):
 		counts = {}
@@ -272,7 +311,7 @@ class Article:
 		if domain in Article.sitedata:
 			if Article.sitedata[domain] == 'credible': return 2
 			else: return -2
-		else: return -1
+		else: return -0.5
 
 	def _ngrams(self, text, n):
 		text = text.split(' ')

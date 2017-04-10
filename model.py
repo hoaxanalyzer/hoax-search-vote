@@ -34,7 +34,7 @@ class Model:
 		feedbacks = self.db.get_reference_feedback()
 
 		with open(self.csvlocation, 'w') as file:
-			file.write("desc,fea1,fea2,fea3,fea4,fea21,fea22,fea23,fea24,similarity,qcount,qperct,label\n")
+			file.write("desc,fea1,fea2,fea3,fea4,fea21,fea22,fea23,fea24,similarity,qcount,qperct,qonsen,label\n")
 			length = len(feedbacks)
 			for qid in feedbacks:
 				datasets = []
@@ -85,7 +85,7 @@ class Model:
 		df2, targets = self._encode_target(df, "label")
 
 		print(targets)
-		features = list(df2.columns[:11])
+		features = list(df2.columns[:12])
 		print("* features:", features)
 
 		y = df2["target"]

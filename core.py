@@ -38,9 +38,13 @@ class Analyzer:
 
 	def __do_voting(self, conclusion):
 		THRESHOLD_UNKNOWN = 0.35
+		#if (conclusion[0] > (conclusion[1] + conclusion[2] + conclusion[3])): return 3
+		if (abs(conclusion[1] - conclusion[2]) < 0.5): return 3
 		if ((conclusion[1] == 0) and (not conclusion[2] == 0)):
+			if (conclusion[2] < 2.5): return 3
 			if(conclusion[2] >= (conclusion[3] - (conclusion[2]/2))): return 2
 		if ((conclusion[2] == 0) and (not conclusion[1] == 0)):
+			if (conclusion[1] < 2.5): return 3
 			if(conclusion[1] >= (conclusion[3] - (conclusion[1]/2))): return 1
 		if ((conclusion[3] + 2.5) > (conclusion[1] + conclusion[2])):
 			return 3
@@ -75,8 +79,11 @@ class Analyzer:
 			if m.label == label:
 				selected.append(m)	
 		for m in meta:
-			if m.label != label:
+			if m.label != label and m.label != 'unrelated':
 				selected.append(m)	
+		for m in meta:
+			if m.label == 'unrelated':
+				selected.append(m)
 		return selected
 
 	def _get_conclusion(self, dataset):
@@ -105,6 +112,14 @@ class Analyzer:
 					idx = 0
 				elif article.feature_query_percentage < 0.45:
 					idx = 0
+				elif (article.feature_query_percentage > 0.95) and (article.feature_query_count <= 10):
+					idx = 0
+				elif (article.feature_query_percentage <= 0.6) and (article.feature_query_onesen == 0):
+					idx = 0
+				elif (article.similarity < 0.35) and (article.feature_query_count < 2):
+					idx = 0
+				elif (article.similarity < 0.25) and (article.feature_query_count < 5):
+					idx = 0
 				elif len(article.content) < 400:
 					idx = 3
 				elif counts[1] == 0 and counts[0] == 0 and counts[3] < 20:
@@ -115,12 +130,6 @@ class Analyzer:
 					idx = 2
 				elif counts[1] > counts[0] * 2.5:
 					idx = 1
-				elif (article.feature_query_percentage > 0.95) and (article.feature_query_count <= 10):
-					idx = 0
-				elif (article.similarity < 0.35) and (article.feature_query_count < 2):
-					idx = 0
-				elif (article.similarity < 0.25) and (article.feature_query_count < 5):
-					idx = 0
 				else:
 					idx = clf.predict([article.get_features_array()])[0]
 
@@ -154,6 +163,7 @@ class Analyzer:
 				data["text"] = r.content[:900] + "... (see more at source)"
 				data["id"] = r.ahash
 				data["site_score"] = r.url_score
+				data["date"] = str(r.date)
 				data["feature"] = str(r.get_humanize_feature())
 				data["counts"] = str(r.get_category_count())
 				lor.append(data)
@@ -255,6 +265,7 @@ class Analyzer:
 			data["text"] = r.content[:900] + "... (see more at source)"
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
+			data["date"] = str(r.date)
 			data["feature"] = str(r.get_humanize_feature())
 			data["counts"] = str(r.get_category_count())
 			lor.append(data)
