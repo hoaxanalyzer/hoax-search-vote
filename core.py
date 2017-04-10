@@ -17,7 +17,7 @@ class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
 	def __init__(self, text, query, client=None):
-		self.text = json.dumps(text)
+		self.text = ''.join([i if ord(i) < 128 else ' ' for i in text])
 		#self.query = query
 		self.query = ' '.join(self.__query_unique_list(query.split()))
 	
