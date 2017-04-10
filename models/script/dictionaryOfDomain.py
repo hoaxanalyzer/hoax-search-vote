@@ -138,6 +138,7 @@ sites["slate.com"] = 'credible'
 sites["usatoday.com"] = 'credible'
 sites["washingtonpost.com"] = 'credible'
 sites["wsj.com"] = 'credible'
+sites["snopes.com"] = 'credible'
 
 sites["regated.com"] = "bias"
 sites["100percentfedup.com"] = "bias"
