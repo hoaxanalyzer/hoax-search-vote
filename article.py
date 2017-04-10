@@ -84,9 +84,9 @@ class Article:
 		self.content_clean = re.sub(r"[^\w\s]|_+", ' ', self.content.lower())
 		
 		self.sentences = self._get_sentences(self.content)
-		self.feature_fact = self._ngram_counter(Article.factgram, self.sentences, 3)
-		self.feature_hoax = self._ngram_counter(Article.hoaxgram, self.sentences, 3)
-		self.feature_unkn = self._ngram_counter(Article.unkngram, self.sentences, 3)
+		self.feature_fact = self._ngram_counter(Article.factgram, self.sentences, 1)
+		self.feature_hoax = self._ngram_counter(Article.hoaxgram, self.sentences, 2)
+		self.feature_unkn = self._ngram_counter(Article.unkngram, self.sentences, 1)
 		self.feature_asmp = self._ngram_counter(Article.asmpgram, self.sentences, 0)
 
 		self.ofeature_fact = self._old_ngram_counter(Article.factgram, (self.content_clean))

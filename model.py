@@ -91,7 +91,7 @@ class Model:
 		y = df2["target"]
 		X = df2[features]
 
-		clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(12,6), random_state=1)
+		clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(50,25), random_state=1)
 		clf.fit(X, y)
 
 		joblib.dump(clf, self.modellocation) 
