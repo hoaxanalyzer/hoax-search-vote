@@ -17,7 +17,7 @@ class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
 	def __init__(self, text, query, client=None):
-		self.text = text
+		self.text = json.dumps(text)
 		#self.query = query
 		self.query = ' '.join(self.__query_unique_list(query.split()))
 	
@@ -112,10 +112,8 @@ class Analyzer:
 					idx = 0
 				elif article.feature_query_percentage < 0.45:
 					idx = 0
-				elif (article.feature_query_percentage > 0.95) and (article.feature_query_count <= 10):
-					idx = 0
-				elif (article.feature_query_percentage <= 0.6) and (article.feature_query_onesen == 0):
-					idx = 0
+				elif article.feature_query_percentage < 0.67 and article.similarity < 0.37:
+					idx = 3
 				elif (article.similarity < 0.35) and (article.feature_query_count < 2):
 					idx = 0
 				elif (article.similarity < 0.25) and (article.feature_query_count < 5):
