@@ -32,10 +32,10 @@ class Article:
 		"(?<!tidak\sada\s)referensi", "(?<!tidak\sada\s)kesaksian", "(?<!tidak\sada\s)saksi",\
 		"(?<!not\s)official(?!s)", "(?<!lembaga\s)(?<!tidak\s)resmi"])]
 
-	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "isu", "editan",\
+	hoaxgram = [WordGram(["(?<!not\s)hoax", "berita bohong", "kabar burung", "hoak", "hoaks", "editan",\
 		"mitos", "like a hoax", "seperti hoax", "mirip hoax", "(?<!not\s)fake", "penipuan", "tipuan",\
 		"palsu", "memperdaya", "a lie", "bohong", "kebohongan", "pemalsuan", "penipuan", "rumor", "rumor",\
-		"isu", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya",\
+		"\bisu\b", "false", "tidak benar", "ditepis", "menyatakan sebaliknya", "in fact", "faktanya", "sebenarnya",\
 		"sesungguhnya", "sebetulnya", "fake news", "berita palsu", "berita yang tidak benar", "debunked",\
 		"tidak terbukti", "terbukti salah", "dipatahkan", "conspiracy", "konspirasi", "kontroversi", "menyangka",\
 		"mengharapkan", "uncertain", "tidak pasti", "samar", "skeptical", "skeptis", "curiga", "ragu", "satirical",\
@@ -266,11 +266,15 @@ class Article:
 					word = qword.rsplit()
 					epattern = re.compile(r'%s' % "\s+".join(word), re.IGNORECASE)
 					has_qword = self.__is_has_word(epattern, sentences, sidx, r)
+			epattern = re.compile(r'\bnot\b')
+			has_nword = self.__is_has_word(epattern, sentences, sidx, 0)
 			if has_qword:
 				for ngram in ngrams:
 					#print(ngram.pattern())
 					pattern = regex.findall(ngram.pattern(), sentence.lower())
 					counts[ngram.value] += len(pattern)
+					if has_nword:
+						counts[ngram.value] -= len(pattern)
 			sidx += 1
 		return counts
 
