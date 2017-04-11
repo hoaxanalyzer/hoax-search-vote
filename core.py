@@ -105,7 +105,6 @@ class Analyzer:
 		choax = 0
 
 		if len(dataset) > 2:
-			dataset = self.__cleanup_dataset(dataset)
 			dataset = self.__calculate_weight(dataset)
 
 			sentences = []
@@ -167,6 +166,7 @@ class Analyzer:
 
 			s = Searcher(self.query)
 			dataset = s.get_news(query["query_hash"])
+			dataset = self.__cleanup_dataset(dataset)
 
 			conclusion, cfact, choax = self._get_conclusion(dataset)
 			ridx = self.__do_voting(conclusion, cfact, choax)
@@ -267,6 +267,7 @@ class Analyzer:
 		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
 		print("Search for all")
 		dataset = s.search_all()
+		dataset = self.__cleanup_dataset(dataset)
 
 		print(dataset)
 		print("Going to conclusion")
