@@ -36,12 +36,16 @@ class Analyzer:
 	    [ulist.append(x) for x in l if x not in ulist]
 	    return ulist
 
-	def __do_voting(self, conclusion, cfact, choax):
+	def __do_voting(self, conclusion, sites):
 		THRESHOLD_UNKNOWN = 0.35
 		## Credible News
-		if cfact > 2 and cfact > choax: return 1
-		if choax > 2 and choax > cfact: return 2
+		if sites["cfact"] > 2 and sites["cfact"] > sites["choax"]: return 1
+		if sites["choax"] > 2 and sites["choax"] > sites["cfact"]: return 2
+		## Not credible News
+		if sites["nfact"] > 2 and sites["choax"] != 0: return 2
+		if sites["nhoax"] > 2 and sites["cfact"] != 0: return 1
 
+		if (sites["tfact"] + sites["thoax"] + sites["tunk"] < 3): return 3
 		if (abs(conclusion[1] - conclusion[2]) < 0.5): return 3
 		if ((conclusion[1] == 0) and (not conclusion[2] == 0)):
 			if (conclusion[2] < 2.5): return 3
@@ -101,8 +105,15 @@ class Analyzer:
 
 	def _get_conclusion(self, dataset):
 		conclusion = [0] * 4
-		cfact = 0
-		choax = 0
+		sites = {}
+		sites["tfact"] = 0
+		sites["thoax"] = 0
+		sites["tunk"] = 0
+		sites["tunr"] = 0
+		sites["cfact"] = 0
+		sites["choax"] = 0
+		sites["nfact"] = 0
+		sites["nhoax"] = 0
 
 		if len(dataset) > 2:
 			dataset = self.__calculate_weight(dataset)
@@ -132,20 +143,37 @@ class Analyzer:
 
 				article.set_label(Analyzer.target[idx])
 				conclusion[idx] += 1 + article.weight
-				if article.url_score >= 2:
-					if idx == 1:
-						cfact += 1
-					elif idx == 2:
-						choax += 1
-
+				if idx == 1:
+					sites["tfact"] += 1
+					if article.url_score >= 2:
+						sites["cfact"] += 1
+					if article.url_score <= -2:
+						sites["nfact"] += 1
+				elif idx == 2:
+					sites["thoax"] += 1
+					if article.url_score >= 2:
+						sites["choax"] += 1
+					if article.url_score <= -2:
+						sites["nhoax"] += 1
+				elif idx == 3:
+					sites["tunk"] += 1
+				elif idx == 0:
+					sites["tunr"] += 1
 				i += 1
 
-		return (conclusion, cfact, choax)
+		return (conclusion, sites)
 
 	def _get_alt_conclusion(self, dataset):
 		conclusion = [0] * 4
-		cfact = 0
-		choax = 0
+		sites = {}
+		sites["tfact"] = 0
+		sites["thoax"] = 0
+		sites["tunk"] = 0
+		sites["tunr"] = 0
+		sites["cfact"] = 0
+		sites["choax"] = 0
+		sites["nfact"] = 0
+		sites["nhoax"] = 0
 
 		if len(dataset) > 2:
 			dataset = self.__calculate_weight(dataset)
@@ -191,23 +219,33 @@ class Analyzer:
 
 				article.set_label(Analyzer.target[idx])
 				conclusion[idx] += 1 + article.weight
-				if article.url_score >= 2:
-					if idx == 1:
-						cfact += 1
-					elif idx == 2:
-						choax += 1
-
+				if idx == 1:
+					sites["tfact"] += 1
+					if article.url_score >= 2:
+						sites["cfact"] += 1
+					if article.url_score <= -2:
+						sites["nfact"] += 1
+				elif idx == 2:
+					sites["thoax"] += 1
+					if article.url_score >= 2:
+						sites["choax"] += 1
+					if article.url_score <= -2:
+						sites["nhoax"] += 1
+				elif idx == 3:
+					sites["tunk"] += 1
+				elif idx == 0:
+					sites["tunr"] += 1
 				i += 1
 
-		return (conclusion, cfact, choax)
+		return (conclusion, sites)
 
 	def _determine_result(self, dataset):
-		conclusion, cfact, choax = self._get_conclusion(dataset)
-		ridx = self.__do_voting(conclusion, cfact, choax)
+		conclusion, sites = self._get_conclusion(dataset)
+		ridx = self.__do_voting(conclusion, sites)
 
 		if ridx == 3: # If UNKNOWN
-			conclusion, cfact, choax = self._get_alt_conclusion(dataset)
-			ridx = self.__do_voting(conclusion, cfact, choax)			
+			conclusion, sites = self._get_alt_conclusion(dataset)
+			ridx = self.__do_voting(conclusion, sites)			
 
 		return (conclusion, ridx)
 
