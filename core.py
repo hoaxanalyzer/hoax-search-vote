@@ -139,9 +139,9 @@ class Analyzer:
 					idx = 1
 				elif counts[1] == 0 and counts[0] == 0 and counts[3] >= 20:
 					idx = 3
-				elif counts[0] > counts[1] * 2.5:
+				elif counts[1] >= 1 and counts[0] > counts[1] * 2.5:
 					idx = 2
-				elif counts[1] > counts[0] * 2.5:
+				elif counts[0] >= 1 and counts[1] > counts[0] * 2.5:
 					idx = 1
 				else:
 					idx = clf.predict([article.get_features_array()])[0]
