@@ -98,9 +98,10 @@ class Analyzer:
 		clean_dataset = []
 		for article in dataset:
 			url = article.url.rstrip()
-			if url not in checked:
-				checked[url] = True
-				clean_dataset.append(article)
+			if "forum" not in article.url_base:
+				if url not in checked:
+					checked[url] = True
+					clean_dataset.append(article)
 		return clean_dataset
 
 	def _get_conclusion(self, dataset):
@@ -138,6 +139,8 @@ class Analyzer:
 					idx = 0
 				elif len(article.content) < 400:
 					idx = 3
+				elif counts[0] >= 2 and counts[1] == 0:
+					idx = 2
 				else:
 					idx = clf.predict([article.get_features_array()])[0]
 

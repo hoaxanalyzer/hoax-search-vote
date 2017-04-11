@@ -49,7 +49,7 @@ class Article:
 		"tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists",\
 		"dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity",\
 		"no direct correlation", "no correlation", "disreputable", "to tarnish", "no such thing", "fan-fiction", "absurdity of the claim",\
-		"absurd claim",\
+		"absurd claim", "lacks truth",\
 		"not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop"])]
 
 	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan",\
