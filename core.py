@@ -89,12 +89,23 @@ class Analyzer:
 				selected.append(m)
 		return selected
 
+	def __cleanup_dataset(self, dataset):
+		checked = {}
+		clean_dataset = []
+		for article in dataset:
+			url = article.url.rstrip()
+			if url not in checked:
+				checked[url] = True
+				clean_dataset.append(article)
+		return clean_dataset
+
 	def _get_conclusion(self, dataset):
 		conclusion = [0] * 4
 		cfact = 0
 		choax = 0
 
 		if len(dataset) > 2:
+			dataset = self.__cleanup_dataset(dataset)
 			dataset = self.__calculate_weight(dataset)
 
 			sentences = []
@@ -106,8 +117,6 @@ class Analyzer:
 			similar = Similar(self.text, sentences)
 			clf = joblib.load('./models/generated_model.pkl') 
 			i = 0
-
-
 
 			for num, result in similar.rank:
 				article = dataset[num]
