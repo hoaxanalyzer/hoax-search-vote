@@ -125,6 +125,49 @@ class Analyzer:
 				counts = article.get_category_count()
 				if article.similarity < 0.045:
 					idx = 0
+				elif len(article.content) < 400:
+					idx = 3
+				else:
+					idx = clf.predict([article.get_features_array()])[0]
+
+				article.set_label(Analyzer.target[idx])
+				conclusion[idx] += 1 + article.weight
+				if article.url_score >= 2:
+					if idx == 1:
+						cfact += 1
+					elif idx == 2:
+						choax += 1
+
+				i += 1
+
+		return (conclusion, cfact, choax)
+
+	def _get_alt_conclusion(self, dataset):
+		conclusion = [0] * 4
+		cfact = 0
+		choax = 0
+
+		if len(dataset) > 2:
+			dataset = self.__calculate_weight(dataset)
+
+			sentences = []
+			for article in dataset:
+				sentences.append(article.content_clean[:550])
+
+			# ATTETION HERE! CHANGE THE QUERY TO TEXT
+			#similar = Similar(self._get_query_hoax(), sentences)
+			similar = Similar(self.text, sentences)
+			clf = joblib.load('./models/generated_model.pkl') 
+			i = 0
+
+			for num, result in similar.rank:
+				article = dataset[num]
+				article.set_similarity(result)
+				article.count_query_appeared(self.text)
+
+				counts = article.get_category_count()
+				if article.similarity < 0.045:
+					idx = 0
 				elif article.feature_query_percentage < 0.45:
 					idx = 0
 				elif article.feature_query_percentage < 0.67 and article.similarity < 0.37:
@@ -158,6 +201,16 @@ class Analyzer:
 
 		return (conclusion, cfact, choax)
 
+	def _determine_result(self, dataset):
+		conclusion, cfact, choax = self._get_conclusion(dataset)
+		ridx = self.__do_voting(conclusion, cfact, choax)
+
+		if ridx == 3: # If UNKNOWN
+			conclusion, cfact, choax = self._get_alt_conclusion(dataset)
+			ridx = self.__do_voting(conclusion, cfact, choax)			
+
+		return (conclusion, ridx)
+
 	def retrieve(self, loghash):
 		query = self.db.get_query_by_loghash(loghash)
 		if not query == None:
@@ -168,8 +221,7 @@ class Analyzer:
 			dataset = s.get_news(query["query_hash"])
 			dataset = self.__cleanup_dataset(dataset)
 
-			conclusion, cfact, choax = self._get_conclusion(dataset)
-			ridx = self.__do_voting(conclusion, cfact, choax)
+			conclusion, ridx = self._determine_result(dataset)
 			references = self.__get_references(dataset, Analyzer.target[ridx])
 
 			lor = []
@@ -271,8 +323,7 @@ class Analyzer:
 
 		print(dataset)
 		print("Going to conclusion")
-		conclusion, cfact, choax = self._get_conclusion(dataset)
-		ridx = self.__do_voting(conclusion, cfact, choax)
+		conclusion, ridx = self._determine_result(dataset)
 		references = self.__get_references(dataset, Analyzer.target[ridx])
 
 		lor = []

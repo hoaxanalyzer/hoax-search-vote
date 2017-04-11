@@ -274,7 +274,7 @@ class Article:
 					pattern = regex.findall(ngram.pattern(), sentence.lower())
 					counts[ngram.value] += len(pattern)
 					if has_nword:
-						counts[ngram.value] -= len(pattern) - 1
+						counts[ngram.value] -= len(pattern)
 			sidx += 1
 		return counts
 
