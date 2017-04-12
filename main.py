@@ -120,8 +120,9 @@ def analyze():
 	extracted_query = create_text_query(query)
 	logging.info("Starting Analyze " + query[:25])
 	analyzer = Analyzer(query, extracted_query, client)
-	logging.info("Finish Analyze " + query[:25])
+	logging.info("Finish INIT Analyze " + query[:25])
 	result = json.dumps(analyzer.do())
+	logging.info("Finish Analyze " + query[:25])
 	#except Exception as e:
 	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result

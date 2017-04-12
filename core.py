@@ -13,6 +13,15 @@ from helper import Searcher
 from article import Article
 from database import Database
 
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+root.addHandler(ch)
+
 class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
@@ -347,9 +356,12 @@ class Analyzer:
 	# 	yield json.dumps(result)
 
 	def do(self):
+		logging.info("Start do Analyze")
 		dataset = []
 
+		logging.info("Start INIT Searcher")
 		s = Searcher(self._get_query_hoax())
+		logging.info("Finish INIT Searcher")
 
 		if not "ip" in list(self.client.keys()):
 			self.client["ip"] = "unknown"
@@ -359,13 +371,17 @@ class Analyzer:
 		query_uuid = uuid.uuid4().hex
 		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
 		print("Search for all")
+		logging.info("Start Search ALL")
 		dataset = s.search_all()
+		logging.info("Finish Search ALL")
 		dataset = self.__cleanup_dataset(dataset)
+		logging.info("Finish Clean Dataset")
 
 		print(dataset)
 		print("Going to conclusion")
 		conclusion, ridx = self._determine_result(dataset)
 		references = self.__get_references(dataset, Analyzer.target[ridx])
+		logging.info("Finish Determine Conclusion")
 
 		lor = []
 		for r in references:
@@ -381,6 +397,7 @@ class Analyzer:
 			data["counts"] = str(r.get_category_count())
 			lor.append(data)
 
+		logging.info("Finish Gathering References")
 		result = {}
 		result["query"] = self.query
 		result["hash"] = s.query_hash

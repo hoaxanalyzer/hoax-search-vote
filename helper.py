@@ -24,6 +24,15 @@ import searcher
 
 import config
 
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+root.addHandler(ch)
+
 class Searcher:
 	basedir = "news"
 	factgram = ["real", "official", "officially", "true", "truth"]
@@ -52,13 +61,16 @@ class Searcher:
 
 	def search_all(self):
 		print("Start search for query: " + self.query)
+		logging.info("Start do SEARCH ALL")
 		cache = self._get_cache()
 		if not len(cache) > 10:
 			print("No Cache")
 			if len(cache) != 0:
 				self.db.del_reference_by_qhash(self.query_hash)
+			logging.info("Finish INIT SEARCH ALL")
 
 			results = (searcher.search_all(self.query))
+			logging.info("Finish SEARCH ALL for " + self.query)
 
 			articles = []
 			datasets = []
@@ -75,7 +87,9 @@ class Searcher:
 				a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
 				datasets.append(a)
 
+			logging.info("Finish Gathering Results")
 			self.db.insert_references(self.qid, articles)
+			logging.info("Finish Insert to DB")
 
 			pdatasets = datasets
 			# pdatasets = self.search(searches)
