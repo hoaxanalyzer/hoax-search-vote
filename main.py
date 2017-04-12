@@ -41,7 +41,16 @@ parser = WebhookParser(channel_secret)
 application = Flask(__name__)
 CORS(application)
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+#logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+root.addHandler(ch)
 
 def detect_client():
 	client = {}
@@ -107,8 +116,11 @@ def analyze():
 	query = request.json['query']
 	query = query.replace('\n', '')
 	
+	logging.info("Starting Extract Query " + query[:25])
 	extracted_query = create_text_query(query)
+	logging.info("Starting Analyze " + query[:25])
 	analyzer = Analyzer(query, extracted_query, client)
+	logging.info("Finish Analyze " + query[:25])
 	result = json.dumps(analyzer.do())
 	#except Exception as e:
 	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
