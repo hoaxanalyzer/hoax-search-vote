@@ -13,6 +13,8 @@ from helper import Searcher
 from article import Article
 from database import Database
 
+f = open('logfile', 'w')
+
 class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 
@@ -347,6 +349,7 @@ class Analyzer:
 	# 	yield json.dumps(result)
 
 	def do(self):
+		f.write('[' + str(time.time()) + '] Starting Analyze with query: ' + self.text + '\n')
 		dataset = []
 
 		s = Searcher(self._get_query_hoax())
