@@ -6,6 +6,8 @@ from . import search
 import multiprocessing
 import hashlib
 import json
+from urllib.request import urlopen
+import urllib
 
 from newspaper import Article
 from newspaper.configuration import Configuration
@@ -17,13 +19,21 @@ def extract(results):
     config = Configuration()
     config.fetch_images = False
 
-    article = Article(results["url"], config=config)
-    retry = 0    
-    while not article.is_downloaded and retry < 3:
-      article.download()
-      retry += 1
+    req = urllib.request.Request(results["url"], headers={'User-Agent' : "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.0.1) Gecko/20020919"}) 
+    con = urllib.request.urlopen(req)
+    html = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
+
+    article = Article(url='', config=config)
+    article.set_html(html)
     article.parse()
     text = ''.join([i if ord(i) < 128 else ' ' for i in str(article.text)])
+
+    if len(text) < 300:
+      article = Article(url='', config=config, language="id")
+      article.set_html(html)
+      article.parse()
+      text = ''.join([i if ord(i) < 128 else ' ' for i in str(article.text)])
+
     print("=", end='', flush=True)
     return (results["url"], results["title"], text, article.publish_date) 
   except Exception as e:
@@ -58,13 +68,14 @@ def search_all(keyword):
   with multiprocessing.Pool(processes=8) as pool: 
     ret = pool.map(extract, results)
   print("\nFinish Extracting")
+  print(ret)
   return ret
 
 if __name__== "__main__":
   import time
   start = time.time()
 
-  keyword = "american vietnam military unite native supernatural state war recruit scout course"
+  keyword = "jalan gatot subroto di tutup pada hari sabtu"
   results = get_articles(keyword) ## This took 2s ~ 10s
 
   end = time.time()

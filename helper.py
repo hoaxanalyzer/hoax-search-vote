@@ -69,7 +69,6 @@ class Searcher:
 
 			for url, title, text, date in results:
 				print(url)
-				print(text[:20])
 				if text != None:
 					article = {}
 					article["qhash"] = self.query_hash

@@ -114,7 +114,7 @@ def analyze():
 	#try:
 	client = detect_client()
 	query = request.json['query']
-	query = query.replace('\n', '')
+	query = query.replace('\n', ' ')
 	
 	logging.info("Starting Extract Query " + query[:25])
 	extracted_query = create_text_query(query)
