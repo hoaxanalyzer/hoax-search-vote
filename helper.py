@@ -25,15 +25,6 @@ import searcher
 
 import config
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-root.addHandler(ch)
-
 class Searcher:
 	basedir = "news"
 	factgram = ["real", "official", "officially", "true", "truth"]
@@ -64,7 +55,7 @@ class Searcher:
 		print("Start search for query: " + self.query)
 		logging.info("Start do SEARCH ALL")
 		cache = self._get_cache()
-		if not len(cache) > 10:
+		if not len(cache) > 100:
 			print("No Cache")
 			if len(cache) != 0:
 				self.db.del_reference_by_qhash(self.query_hash)
@@ -76,17 +67,20 @@ class Searcher:
 			articles = []
 			datasets = []
 
-			for result in results:
-				article = {}
-				article["qhash"] = self.query_hash
-				article["hash"] = uuid.uuid4().hex
-				article["content"] = result[2] + '. ' + result[1]				
-				article["url"] = result[0]
-				article["date"] = str(result[3])
-				articles.append(article)
+			for url, title, text, date in results:
+				print(url)
+				print(text[:20])
+				if text != None:
+					article = {}
+					article["qhash"] = self.query_hash
+					article["hash"] = uuid.uuid4().hex
+					article["content"] = title + '. ' + text				
+					article["url"] = url
+					article["date"] = str(date)
+					articles.append(article)
 
-				a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
-				datasets.append(a)
+					a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
+					datasets.append(a)
 
 			logging.info("Finish Gathering Results")
 			self.db.insert_references(self.qid, articles)

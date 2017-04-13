@@ -8,8 +8,9 @@ class Database:
 		self.conn = pymysql.connect(user=config.mysql_credentials["user"], \
 									password=config.mysql_credentials["password"], \
 									host=config.mysql_credentials["host"], \
-									db=config.mysql_credentials["database"],
-									cursorclass=pymysql.cursors.DictCursor)
+									db=config.mysql_credentials["database"], \
+									cursorclass=pymysql.cursors.DictCursor,
+                       				charset='utf8')
 		self.cur = self.conn.cursor()
 
 	def __enter__(self):
