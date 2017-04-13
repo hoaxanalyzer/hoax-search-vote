@@ -152,22 +152,6 @@ def analyze_image():
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result
 
-@application.route("/analyze/stream", methods=['POST'])
-def analyze_stream():
-	try:
-		if request.headers.get('accept') == 'text/event-stream':
-			client = detect_client()
-			query = request.json['query']
-			query = query.replace('\n', '')
-			
-			extracted_query = create_text_query(query)
-			analyzer = Analyzer(query, extracted_query, client)
-
-			return Response(analyzer.do_stream(), content_type='text/event-stream')
-	except Exception as e:
-		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
-	return result
-
 @application.route("/result", methods=['POST'])
 def result():
 	#try:

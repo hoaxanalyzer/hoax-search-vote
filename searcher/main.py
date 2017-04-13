@@ -20,7 +20,7 @@ def extract(results):
     config.fetch_images = False
 
     req = urllib.request.Request(results["url"], headers={'User-Agent' : "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.0.1) Gecko/20020919"}) 
-    con = urllib.request.urlopen(req)
+    con = urllib.request.urlopen(req, timeout=10)
     html = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
 
     article = Article(url='', config=config)
@@ -33,6 +33,8 @@ def extract(results):
       article.set_html(html)
       article.parse()
       text = ''.join([i if ord(i) < 128 else ' ' for i in str(article.text)])
+
+    text = text.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
 
     print("=", end='', flush=True)
     return (results["url"], results["title"], text, article.publish_date) 
@@ -68,7 +70,6 @@ def search_all(keyword):
   with multiprocessing.Pool(processes=8) as pool: 
     ret = pool.map(extract, results)
   print("\nFinish Extracting")
-  print(ret)
   return ret
 
 if __name__== "__main__":

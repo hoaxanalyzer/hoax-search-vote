@@ -76,7 +76,7 @@ def bing(keyword):
   exc = ' -' + ' -'.join(exclusion)
   data = {}
   data["keyword"] = keyword + exc
-  data["url"] = "https://bing.com/search"
+  data["url"] = "https://www.bing.com/search"
   data["payload"] = {
     'q': keyword,
     'qs': 'n',

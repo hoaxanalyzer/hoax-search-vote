@@ -297,56 +297,6 @@ class Analyzer:
 			result["message"] = "Query not found"
 		return result
 		
-	# def do_stream(self):
-	# 	dataset = []
-
-	# 	yield "{'step':0, 'total':2, 'message':'Initializing'}\n"
-	# 	time.sleep(.1)
-	# 	s = Searcher(self._get_query_hoax())
-
-	# 	if not "ip" in list(self.client.keys()):
-	# 		self.client["ip"] = "unknown"
-	# 	if not "browser" in list(self.client.keys()):
-	# 		self.client["browser"] = "unknown"
-
-	# 	query_uuid = uuid.uuid4().hex
-	# 	s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
-		
-	# 	yield "{'step':1, 'total':2, 'message':'Search for data'}\n"
-	# 	time.sleep(.1)
-	# 	dataset = s.search_all()
-
-	# 	yield "{'step':2, 'total':2, 'message':'Determining conclusion'}\n"
-	# 	time.sleep(.1)
-	# 	conclusion = self._get_conclusion(dataset)
-	# 	ridx = self.__do_voting(conclusion)
-	# 	references = self.__get_references(dataset, Analyzer.target[ridx])
-
-	# 	lor = []
-	# 	for r in references:
-	# 		data = {}
-	# 		data["url"] = r.url
-	# 		data["url_base"] = r.url_base
-	# 		data["label"] = r.label
-	# 		data["text"] = r.content[:900] + "... (see more at source)"
-	# 		data["id"] = r.ahash
-	# 		data["site_score"] = r.url_score
-	# 		data["feature"] = str(r.get_humanize_feature())
-	# 		data["counts"] = str(r.get_category_count())
-	# 		lor.append(data)
-
-	# 	result = {}
-	# 	result["query"] = self.query
-	# 	result["hash"] = s.query_hash
-	# 	result["conclusion"] = Analyzer.target[ridx]
-	# 	result["scores"] = conclusion
-	# 	result["references"] = lor
-	# 	result["status"] = "Success"
-	# 	result["id"] = query_uuid
-
-	# 	self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
-	# 	yield json.dumps(result)
-
 	def do(self):
 		logging.info("Start do Analyze")
 		dataset = []
@@ -369,8 +319,7 @@ class Analyzer:
 		dataset = self.__cleanup_dataset(dataset)
 		logging.info("Finish Clean Dataset")
 
-		print(dataset)
-		print("Going to conclusion")
+		logging.info("Going to Conclusion")
 		conclusion, ridx = self._determine_result(dataset)
 		references = self.__get_references(dataset, Analyzer.target[ridx])
 		logging.info("Finish Determine Conclusion")

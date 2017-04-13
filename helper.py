@@ -68,7 +68,6 @@ class Searcher:
 			datasets = []
 
 			for url, title, text, date in results:
-				print(url)
 				if text != None:
 					article = {}
 					article["qhash"] = self.query_hash
@@ -130,7 +129,7 @@ class Similar:
 		tfidf = models.TfidfModel(corpus)
 		corpus_tfidf = tfidf[corpus]
 		if len(dictionary) > 0:
-			lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=100) # initialize an LSI transformation
+			lsi = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=50) # initialize an LSI transformation
 			corpus_lsi = lsi[corpus_tfidf] # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
 			return lsi, corpus_lsi
 		return None
@@ -141,6 +140,7 @@ class Similar:
 		index = similarities.MatrixSimilarity(lsi[corpus]) # transform corpus to LSI space and index it
 		sims = index[vec_lsi] # perform a similarity query against the corpus
 		sims = list(enumerate(sims))
+		print(sims)
 		return sims # return sorted (document number, similarity score) 2-tuples
 
 	def similarity_of(self, sentence, paragraph):
