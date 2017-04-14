@@ -8,6 +8,7 @@ import hashlib
 import json
 from urllib.request import urlopen
 import urllib
+import urllib.parse
 
 from newspaper import Article
 from newspaper.configuration import Configuration
@@ -42,6 +43,19 @@ def extract(results):
     print(e)
     return (results["url"], results["title"], None, None)
 
+def extract_api(results):
+  try:
+    data = json.dumps({"url": results["url"]}).encode("utf-8")
+    req = urllib.request.Request("http://hbp.lelah.ga/extract", data, {'Content-Type': 'application/json'})
+    con = urllib.request.urlopen(req, timeout=10)
+    text = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
+
+    print("=", end='', flush=True)
+    return (results["url"], results["title"], text, None) 
+  except Exception as e:
+    print(e)
+    return (results["url"], results["title"], None, None)
+
 def get_articles(keyword):
   se = [search.bing(keyword), search.duckduckgo(keyword)]
 
@@ -68,7 +82,7 @@ def search_all(keyword):
   results = get_articles(keyword) ## This took 2s ~ 10s
   print("Extracting: ", end='', flush=True)
   with multiprocessing.Pool(processes=16) as pool: 
-    ret = pool.map(extract, results)
+    ret = pool.map(extract_api, results)
   print("\nFinish Extracting")
   return ret
 
