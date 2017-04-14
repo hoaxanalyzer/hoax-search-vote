@@ -131,7 +131,7 @@ class Article:
 		features = []
 		## OLD FIRST
 		for h in Article.hoaxgram:
-			features.append(self.ofeature_hoax[h.value] * 0.25)
+			features.append(self.ofeature_hoax[h.value])
 		for f in Article.factgram:
 			features.append(self.ofeature_fact[f.value])
 		for u in Article.unkngram:
@@ -157,7 +157,7 @@ class Article:
 		category = []
 		hoax = 0
 		for h in Article.hoaxgram:
-			hoax += (self.ofeature_hoax[h.value]) * 0.25
+			hoax += (self.ofeature_hoax[h.value])
 		for h in Article.hoaxgram:
 			hoax += (self.feature_hoax[h.value])
 		category.append(hoax)

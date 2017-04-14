@@ -39,6 +39,10 @@ def create_article(data):
 		a = Article(query, article["hash"], article["url"], article["content"], article["date"])
 	return a
 
+def create_article_db(data):
+	a = Article(data["query"], data["hash"], data["url"], data["content"], data["date"])
+	return a
+
 class Searcher:
 	basedir = "news"
 	factgram = ["real", "official", "officially", "true", "truth"]
@@ -94,17 +98,19 @@ class Searcher:
 		else:
 			print("Cached")
 			datasets = []
-			for article in cache:
-				a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
-				datasets.append(a)
+			for a in cache:
+				a.update({"query": self.query})
+			with multiprocessing.Pool(processes=len(cache)) as pool: 
+				datasets = pool.map(create_article_db, cache)
 			return datasets
 
 	def get_news(self, qhash):
 		articles = self.db.get_reference_by_qhash(qhash)
 		datasets = []
-		for article in articles:
-			a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
-			datasets.append(a)
+		for a in articles:
+			a.update({"query": self.query})
+		with multiprocessing.Pool(processes=len(articles)) as pool: 
+			datasets = pool.map(create_article_db, articles)
 		return datasets
 
 class Similar:
