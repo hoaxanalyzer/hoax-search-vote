@@ -99,6 +99,8 @@ class Article:
 		self.feature_query_percentage = 0
 		self.feature_query_onesen = 0
 
+		self.reason = "None"
+
 		if date == "None": date = "1950-01-01 00:00:00+00:00"
 		if date == '': date = "1950-01-01 00:00:00+00:00"
 		try:

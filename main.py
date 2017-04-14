@@ -75,7 +75,7 @@ def create_text_query(query):
 		query = ''.join([i if ord(i) < 128 else ' ' for i in query])
 		query = (query.encode('utf-8')).decode('utf-8')
 		payload = json.dumps({'text': query}).encode('utf8')
-		req = urllib.request.Request("https://ah.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
+		req = urllib.request.Request("https://hsecondary.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
@@ -93,7 +93,7 @@ def create_image_query(image):
 	extracted_query = ""
 	text = "error"
 	try:
-		req = urllib.request.Request("https://ah.lelah.ga/extract/image", image.read()) 
+		req = urllib.request.Request("https://hsecondary.lelah.ga/extract/image", image.read()) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 

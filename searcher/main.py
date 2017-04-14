@@ -67,7 +67,7 @@ def search_all(keyword):
   ret = None
   results = get_articles(keyword) ## This took 2s ~ 10s
   print("Extracting: ", end='', flush=True)
-  with multiprocessing.Pool(processes=8) as pool: 
+  with multiprocessing.Pool(processes=16) as pool: 
     ret = pool.map(extract, results)
   print("\nFinish Extracting")
   return ret
@@ -83,8 +83,11 @@ if __name__== "__main__":
   print("Elapsed: " + str(end-start))
 
   ret = None
-  with multiprocessing.Pool(processes=8) as pool: 
-    ret = pool.map(extract, results)
+  with multiprocessing.Pool(processes=16) as pool: 
+    ret = pool.map_async(extract, results)
+    ret.wait(timeout=20)
+    if ret.ready():
+      print (ret.get(timeout=1))
 
   print(ret)
 

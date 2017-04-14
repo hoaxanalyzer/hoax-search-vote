@@ -67,19 +67,20 @@ class Model:
 
 					# ATTETION HERE! CHANGE THE QUERY TO TEXT
 					#similar = Similar(self._get_query_hoax(), sentences)
-					similar = Similar(feedback["query_text"], sentences)
+					if len(sentences) >= 5:
+						similar = Similar(feedback["query_text"], sentences)
 
-					for num, result in similar.rank:
-						if not datasets[num].label == "similarity":
-							article = datasets[num]
-							article.set_similarity(result)
-							article.count_query_appeared(feedback["query_text"])
-							l = "model,"
-							features = article.get_features_array()
-							for fea in features:
-								l += str(fea) + ","
-							l += article.label + "\n"
-							file.write(l)
+						for num, result in similar.rank:
+							if not datasets[num].label == "similarity":
+								article = datasets[num]
+								article.set_similarity(result)
+								article.count_query_appeared(feedback["query_text"])
+								l = "model,"
+								features = article.get_features_array()
+								for fea in features:
+									l += str(fea) + ","
+								l += article.label + "\n"
+								file.write(l)
 
 		df = self._get_data(self.csvlocation)
 		df2, targets = self._encode_target(df, "label")

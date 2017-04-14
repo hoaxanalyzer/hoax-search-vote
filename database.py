@@ -2,6 +2,7 @@ import pymysql.cursors
 from datetime import date, datetime
 import json
 import config
+from article import Article
 
 class Database:
 	def __init__(self):
@@ -51,11 +52,11 @@ class Database:
 		self.conn.commit()
 		return self.cur.lastrowid
 
-	def insert_references(self, qid, articles):
+	def insert_references(self, qid, qhash, articles):
 		if len(articles) > 5:
 			insert_values = []
 			for article in articles:
-				insert_values.append((qid, str(article["qhash"]), str(article['hash']), str(article['date']), str(article['url']), article['content'], datetime.now())) 	
+				insert_values.append((qid, str(qhash), str(article.ahash), str(article.date), str(article.url), article.content, datetime.now())) 	
 			sql = "INSERT INTO article_reference (id_query, query_hash, article_hash, article_date, article_url, article_content, retrieved_at) VALUES" + \
 					",".join("(%s, %s, %s, %s, %s, %s, %s)" for _ in insert_values)
 			flattened_values = [item for sublist in insert_values for item in sublist]

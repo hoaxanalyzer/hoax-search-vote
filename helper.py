@@ -12,6 +12,7 @@ import re
 import time
 import uuid
 import sys
+import multiprocessing
 
 start = time.time()
 
@@ -24,6 +25,19 @@ from database import Database
 import searcher
 
 import config
+
+def create_article(data):
+	url, title, text, date, qhash, query = data
+	a = None
+	if text != None:
+		article = {}
+		article["qhash"] = qhash
+		article["hash"] = uuid.uuid4().hex
+		article["content"] = title + '. ' + text
+		article["url"] = url
+		article["date"] = str(date)
+		a = Article(query, article["hash"], article["url"], article["content"], article["date"])
+	return a
 
 class Searcher:
 	basedir = "news"
@@ -55,10 +69,8 @@ class Searcher:
 		print("Start search for query: " + self.query)
 		logging.info("Start do SEARCH ALL")
 		cache = self._get_cache()
-		if not len(cache) > 100:
+		if not len(cache) > 10:
 			print("No Cache")
-			if len(cache) != 0:
-				self.db.del_reference_by_qhash(self.query_hash)
 			logging.info("Finish INIT SEARCH ALL")
 
 			results = (searcher.search_all(self.query))
@@ -67,26 +79,18 @@ class Searcher:
 			articles = []
 			datasets = []
 
-			for url, title, text, date in results:
-				if text != None:
-					article = {}
-					article["qhash"] = self.query_hash
-					article["hash"] = uuid.uuid4().hex
-					article["content"] = title + '. ' + text				
-					article["url"] = url
-					article["date"] = str(date)
-					articles.append(article)
+			results = [o + (self.query_hash, self.query,) for o in results]
 
-					a = Article(self.query, article["hash"], article["url"], article["content"], article["date"])
-					datasets.append(a)
+			with multiprocessing.Pool(processes=16) as pool: 
+				ret = pool.map(create_article, results)
+
+			datasets = [x for x in ret if x is not None]
 
 			logging.info("Finish Gathering Results")
-			self.db.insert_references(self.qid, articles)
+			self.db.insert_references(self.qid, self.query_hash, datasets)
 			logging.info("Finish Insert to DB")
 
-			pdatasets = datasets
-			# pdatasets = self.search(searches)
-			return pdatasets
+			return datasets
 		else:
 			print("Cached")
 			datasets = []

@@ -137,12 +137,22 @@ class Analyzer:
 
 				counts = article.get_category_count()
 				if article.similarity < 0.045:
+					article.reason = "Similarity < 0.045"
 					idx = 0
 				elif len(article.content) < 400:
+					article.reason = "Content < 400"
 					idx = 3
 				elif counts[0] >= 2 and counts[1] == 0:
+					article.reason = "Rule 1 #1"
 					idx = 2
+				elif counts[1] >= 1 and counts[0] > counts[1] * 2.5:
+					article.reason = "Rule 1 #2"
+					idx = 2
+				elif counts[0] >= 1 and counts[1] > counts[0] * 2.5:
+					article.reason = "Rule 1 #3"
+					idx = 1
 				else:
+					article.reason = "Model Fallback 1"
 					idx = clf.predict([article.get_features_array()])[0]
 
 				article.set_label(Analyzer.target[idx])
@@ -198,27 +208,26 @@ class Analyzer:
 				article.count_query_appeared(self.text)
 
 				counts = article.get_category_count()
-				if article.similarity < 0.045:
-					idx = 0
-				elif article.feature_query_percentage < 0.45:
+				if article.feature_query_percentage < 0.45:
+					article.reason = "Rule 2 #1"
 					idx = 0
 				elif article.feature_query_percentage < 0.67 and article.similarity < 0.37:
+					article.reason = "Rule 2 #2"
 					idx = 3
 				elif (article.similarity < 0.35) and (article.feature_query_count < 2):
+					article.reason = "Rule 2 #3"
 					idx = 0
 				elif (article.similarity < 0.25) and (article.feature_query_count < 5):
+					article.reason = "Rule 2 #4"
 					idx = 0
-				elif len(article.content) < 400:
-					idx = 3
 				elif counts[1] == 0 and counts[0] == 0 and counts[3] < 20:
+					article.reason = "Rule 2 #5"
 					idx = 1
 				elif counts[1] == 0 and counts[0] == 0 and counts[3] >= 20:
+					article.reason = "Rule 2 #6"
 					idx = 3
-				elif counts[1] >= 1 and counts[0] > counts[1] * 2.5:
-					idx = 2
-				elif counts[0] >= 1 and counts[1] > counts[0] * 2.5:
-					idx = 1
 				else:
+					article.reason = "Model Fallback 2"
 					idx = clf.predict([article.get_features_array()])[0]
 
 				article.set_label(Analyzer.target[idx])
@@ -336,6 +345,7 @@ class Analyzer:
 			data["date"] = str(r.date)
 			data["feature"] = str(r.get_humanize_feature())
 			data["counts"] = str(r.get_category_count())
+			data["reason"] = r.reason
 			lor.append(data)
 
 		logging.info("Finish Gathering References")
