@@ -47,7 +47,7 @@ def extract_api(results):
   try:
     data = json.dumps({"url": results["url"]}).encode("utf-8")
     req = urllib.request.Request("http://hbp.lelah.ga/extract", data, {'Content-Type': 'application/json'})
-    con = urllib.request.urlopen(req, timeout=10)
+    con = urllib.request.urlopen(req, timeout=5)
     text = ''.join([x for x in map(chr, con.read()) if ord(x) < 128])
 
     print("=", end='', flush=True)

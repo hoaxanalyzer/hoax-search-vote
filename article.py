@@ -157,7 +157,7 @@ class Article:
 		category = []
 		hoax = 0
 		for h in Article.hoaxgram:
-			hoax += (self.ofeature_hoax[h.value])
+			hoax += ((self.ofeature_hoax[h.value]) * 0.25)
 		for h in Article.hoaxgram:
 			hoax += (self.feature_hoax[h.value])
 		category.append(hoax)

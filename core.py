@@ -287,6 +287,7 @@ class Analyzer:
 				data["date"] = str(r.date)
 				data["feature"] = str(r.get_humanize_feature())
 				data["counts"] = str(r.get_category_count())
+				data["reason"] = r.reason
 				lor.append(data)
 
 			result = {}
