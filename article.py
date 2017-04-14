@@ -91,7 +91,7 @@ class Article:
 		self.feature_asmp = self._ngram_counter(Article.asmpgram, self.sentences, 0)
 
 		self.ofeature_fact = self._old_ngram_counter(Article.factgram, (self.content_clean))
-		self.ofeature_hoax = (self._old_ngram_counter(Article.hoaxgram, (self.content_clean)) * 0.25)
+		self.ofeature_hoax = self._old_ngram_counter(Article.hoaxgram, (self.content_clean))
 		self.ofeature_unkn = self._old_ngram_counter(Article.unkngram, (self.content_clean))
 		self.ofeature_asmp = self._old_ngram_counter(Article.asmpgram, (self.content_clean))
 
@@ -131,7 +131,7 @@ class Article:
 		features = []
 		## OLD FIRST
 		for h in Article.hoaxgram:
-			features.append(self.ofeature_hoax[h.value])
+			features.append(self.ofeature_hoax[h.value] * 0.25)
 		for f in Article.factgram:
 			features.append(self.ofeature_fact[f.value])
 		for u in Article.unkngram:
@@ -157,7 +157,7 @@ class Article:
 		category = []
 		hoax = 0
 		for h in Article.hoaxgram:
-			hoax += (self.ofeature_hoax[h.value])
+			hoax += (self.ofeature_hoax[h.value]) * 0.25
 		for h in Article.hoaxgram:
 			hoax += (self.feature_hoax[h.value])
 		category.append(hoax)
