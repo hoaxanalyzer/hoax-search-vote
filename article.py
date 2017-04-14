@@ -47,10 +47,10 @@ class Article:
 		"tidak kredibel", "tidak ada sumber", "terbukti tidak", "tidak terbukti", "tidak ada bukti", "belum ada bukti",\
 		"tidak menemukan bukti", "tidak ditemukan bukti", "bukan berdasarkan bukti", "tidak membuktikan", "tidak ada penelitian",\
 		"tidak berhubungan", "tidak menemukan hubungan", "tidak ditemukan hubungan", "untrue", "no other scientists",\
-		"dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity",\
+		"dishonestly", "irresponsibly", "still believe", "retracted", "falsified", "no link", "validity", "fan fiction",\
 		"no direct correlation", "no correlation", "disreputable", "to tarnish", "no such thing", "fan-fiction", "absurdity of the claim",\
 		"absurd claim", "lacks truth", "urban legends", "urban legend", "no law against", "answer is no",\
-		"not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop"])]
+		"not been able to replicate", "implausible", "sempat dikabarkan", "error", "april fools", "april mop", "denies", "bogus"])]
 
 	unkngram = [WordGram(["not clear", "tidak jelas", "cant conclude", "tidak ada kesimpulan", "tidak bisa disimpulkan",\
 		"questioned", "mempertanyakan", "dipertanyakan", "menyangsikan", "meragukan", "no answer", "tidak ada jawaban",\
@@ -91,7 +91,7 @@ class Article:
 		self.feature_asmp = self._ngram_counter(Article.asmpgram, self.sentences, 0)
 
 		self.ofeature_fact = self._old_ngram_counter(Article.factgram, (self.content_clean))
-		self.ofeature_hoax = self._old_ngram_counter(Article.hoaxgram, (self.content_clean))
+		self.ofeature_hoax = (self._old_ngram_counter(Article.hoaxgram, (self.content_clean)) * 0.25)
 		self.ofeature_unkn = self._old_ngram_counter(Article.unkngram, (self.content_clean))
 		self.ofeature_asmp = self._old_ngram_counter(Article.asmpgram, (self.content_clean))
 
@@ -157,7 +157,7 @@ class Article:
 		category = []
 		hoax = 0
 		for h in Article.hoaxgram:
-			hoax += ((self.ofeature_hoax[h.value]) * 0.25)
+			hoax += (self.ofeature_hoax[h.value])
 		for h in Article.hoaxgram:
 			hoax += (self.feature_hoax[h.value])
 		category.append(hoax)

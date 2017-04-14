@@ -208,7 +208,16 @@ class Analyzer:
 				article.count_query_appeared(self.text)
 
 				counts = article.get_category_count()
-				if article.feature_query_percentage < 0.45:
+				if article.similarity < 0.045:
+					article.reason = "Similarity < 0.045"
+					idx = 0
+				elif len(article.content) < 400:
+					article.reason = "Content < 400"
+					idx = 3
+				elif counts[0] >= 2 and counts[1] == 0:
+					article.reason = "Rule 2 #1"
+					idx = 2
+				elif article.feature_query_percentage < 0.45:
 					article.reason = "Rule 2 #1"
 					idx = 0
 				elif article.feature_query_percentage < 0.67 and article.similarity < 0.37:
