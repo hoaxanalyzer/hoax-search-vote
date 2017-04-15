@@ -19,6 +19,9 @@ from flask import Flask, Response
 from flask import request, abort
 from flask_cors import CORS, cross_origin
 
+import multiprocessing as mp
+from multiprocessing import Queue
+
 from linebot import (
 	LineBotApi, WebhookParser
 )
@@ -104,6 +107,21 @@ def create_image_query(image):
 
 	return (extracted_query, text)
 
+def get_factcheck(query, queue):
+	logging.info("Factcheck query: " + query)
+	try:
+		query = query.replace('\n', ' ').replace('\r', ' ')
+		query = ''.join([i if ord(i) < 128 else ' ' for i in query])
+		query = (query.encode('utf-8')).decode('utf-8')
+		payload = json.dumps({'text': query}).encode('utf8')
+		req = urllib.request.Request("http://hfc.lelah.ga/check", payload, {'Content-Type': 'application/json'}) 
+		con = urllib.request.urlopen(req, timeout=5)
+		#result = json.loads(con.read().decode('utf-8'))
+		result = con.read().decode('utf-8')
+	except:
+		result = "{\"details\": \"no result\"}"
+	logging.info("Factcheck result: " + str(result))
+	queue.put(result)
 
 @application.route("/")
 def index():
@@ -115,13 +133,22 @@ def analyze():
 	client = detect_client()
 	query = request.json['query']
 	query = query.replace('\n', ' ')
-	
+
 	logging.info("Starting Extract Query " + query[:25])
+	
+	the_queue = Queue()
+	thread_fc = mp.Process(target=get_factcheck, args=(query, the_queue,))
+	thread_fc.start()
+
 	extracted_query = create_text_query(query)
-	logging.info("Starting Analyze " + query[:25])
 	analyzer = Analyzer(query, extracted_query, client)
-	logging.info("Finish INIT Analyze " + query[:25])
-	result = json.dumps(analyzer.do())
+	result = analyzer.do()
+
+	thread_fc.join
+	factcheck = json.loads(the_queue.get())
+	result["factcheck"] = factcheck
+	result = json.dumps(result)
+
 	logging.info("Finish Analyze " + query[:25])
 	#except Exception as e:
 	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
@@ -157,9 +184,23 @@ def result():
 	#try:
 	client = detect_client()
 	quuid = request.json['id']
-	
+
 	analyzer = Analyzer("", "", client)
-	result = json.dumps(analyzer.retrieve(quuid))
+	full_query = analyzer.init_retrieve(quuid)
+
+	if not full_query == None:
+		the_queue = Queue()
+		thread_fc = mp.Process(target=get_factcheck, args=(full_query, the_queue,))
+		thread_fc.start()
+	
+	result = analyzer.retrieve(quuid)
+
+	if not full_query == None:
+		thread_fc.join
+		factcheck = json.loads(the_queue.get())
+		result["factcheck"] = factcheck
+	result = json.dumps(result)
+
 	#except Exception as e:
 	#	result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
 	return result

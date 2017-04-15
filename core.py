@@ -26,6 +26,7 @@ class Analyzer:
 		if not type(self.client) is dict:
 			self.client = {}
 
+		self.retrieved = None
 		self.db = Database()
 	
 	def _get_query_hoax(self):
@@ -262,8 +263,14 @@ class Analyzer:
 
 		return (conclusion, ridx)
 
+	def init_retrieve(self, loghash):
+		self.retrieved = self.db.get_query_by_loghash(loghash)
+		if not self.retrieved == None:
+			return self.retrieved["query_text"]
+		return None
+
 	def retrieve(self, loghash):
-		query = self.db.get_query_by_loghash(loghash)
+		query = self.retrieved
 		if not query == None:
 			self.query = query["query_search"]
 			self.text = query["query_text"]
