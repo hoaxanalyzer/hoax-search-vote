@@ -279,11 +279,11 @@ class Analyzer:
 		if "code" in factcheck:
 			negate = factcheck["is_negate"]
 			if factcheck["code"] == 1:
-				if not negate: conclusion[1] += 7
-				else: conclusion[2] += 7
-			if factcheck["code"] == 2:
 				if not negate: conclusion[2] += 7
 				else: conclusion[1] += 7
+			if factcheck["code"] == 2:
+				if not negate: conclusion[1] += 7
+				else: conclusion[2] += 7
 			if factcheck["code"] == 7:
 				if not negate: conclusion[2] += 5
 				else: conclusion[1] += 5
