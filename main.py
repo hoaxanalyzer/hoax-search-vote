@@ -147,6 +147,11 @@ def analyze():
 	thread_fc.join
 	factcheck = json.loads(the_queue.get())
 	result["factcheck"] = factcheck
+
+	analyzer.recalculate_factcheck(factcheck)
+	result["scores"] = analyzer.conclusion
+	result["conclusion"] = Analyzer.target[analyzer.ridx]
+
 	result = json.dumps(result)
 
 	logging.info("Finish Analyze " + query[:25])
@@ -199,6 +204,9 @@ def result():
 		thread_fc.join
 		factcheck = json.loads(the_queue.get())
 		result["factcheck"] = factcheck
+		analyzer.recalculate_factcheck(factcheck)
+		result["scores"] = analyzer.conclusion
+		result["conclusion"] = Analyzer.target[analyzer.ridx]
 	result = json.dumps(result)
 
 	#except Exception as e:

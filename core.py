@@ -254,14 +254,49 @@ class Analyzer:
 		return (conclusion, sites)
 
 	def _determine_result(self, dataset):
-		conclusion, sites = self._get_conclusion(dataset)
-		ridx = self.__do_voting(conclusion, sites)
-
+		conclusion, self.sites = self._get_conclusion(dataset)
+		ridx = self.__do_voting(conclusion, self.sites)
 		if ridx == 3: # If UNKNOWN
-			conclusion, sites = self._get_alt_conclusion(dataset)
-			ridx = self.__do_voting(conclusion, sites)			
-
+			conclusion, self.sites = self._get_alt_conclusion(dataset)
+			ridx = self.__do_voting(conclusion, self.sites)
 		return (conclusion, ridx)
+
+	def recalculate_factcheck(self, factcheck):
+		########################################
+		##
+		##  Number code meaning
+		##
+		##  0 : Unrelated
+		##  1 : Hoax
+		##  2 : Fact
+		##  3 : Unknown
+		##  7 : Hoax contained sentences
+		##	8 : Neutral sentences, probably facts
+		##
+		########################################
+		conclusion = self.conclusion
+
+		if "code" in factcheck:
+			negate = factcheck["is_negate"]
+			if factcheck["code"] == 1:
+				if not negate: conclusion[1] += 7
+				else: conclusion[2] += 7
+			if factcheck["code"] == 2:
+				if not negate: conclusion[2] += 7
+				else: conclusion[1] += 7
+			if factcheck["code"] == 7:
+				if not negate: conclusion[2] += 5
+				else: conclusion[1] += 5
+			if factcheck["code"] == 8:
+				if not negate: conclusion[1] += 5
+				else: conclusion[2] += 5
+
+		self.ridx = self.__do_voting(conclusion, self.sites)
+		self.conclusion = conclusion
+		return (self.conclusion, self.ridx)
+
+	def result(self):
+		return Analyzer.target[self.ridx]
 
 	def init_retrieve(self, loghash):
 		self.retrieved = self.db.get_query_by_loghash(loghash)
@@ -277,10 +312,10 @@ class Analyzer:
 
 			s = Searcher(self.query)
 			dataset = s.get_news(query["query_hash"])
-			dataset = self.__cleanup_dataset(dataset)
+			self.dataset = self.__cleanup_dataset(dataset)
 
-			conclusion, ridx = self._determine_result(dataset)
-			references = self.__get_references(dataset, Analyzer.target[ridx])
+			self.conclusion, self.ridx = self._determine_result(dataset)
+			references = self.__get_references(dataset, Analyzer.target[self.ridx])
 
 			lor = []
 			for r in references:
@@ -301,13 +336,13 @@ class Analyzer:
 			result["inputText"] = query["query_text"]
 			result["hash"] = query["query_hash"]
 			result["query_search"] = query["query_search"]
-			result["conclusion"] = Analyzer.target[ridx]
-			result["scores"] = conclusion
+			result["conclusion"] = Analyzer.target[self.ridx]
+			result["scores"] = self.conclusion
 			result["references"] = lor
 			result["status"] = "Success"
 			result["id"] = loghash
 
-			self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
+			self.db.insert_result_log(s.qid, self.conclusion[2], self.conclusion[1], self.conclusion[3], self.conclusion[0], result["conclusion"])
 		else:
 			result = {}
 			result["status"] = "Failed"
@@ -333,12 +368,12 @@ class Analyzer:
 		logging.info("Start Search ALL")
 		dataset = s.search_all()
 		logging.info("Finish Search ALL")
-		dataset = self.__cleanup_dataset(dataset)
+		self.dataset = self.__cleanup_dataset(dataset)
 		logging.info("Finish Clean Dataset")
 
 		logging.info("Going to Conclusion")
-		conclusion, ridx = self._determine_result(dataset)
-		references = self.__get_references(dataset, Analyzer.target[ridx])
+		self.conclusion, self.ridx = self._determine_result(dataset)
+		references = self.__get_references(dataset, Analyzer.target[self.ridx])
 		logging.info("Finish Determine Conclusion")
 
 		lor = []
@@ -360,13 +395,13 @@ class Analyzer:
 		result = {}
 		result["query"] = self.query
 		result["hash"] = s.query_hash
-		result["conclusion"] = Analyzer.target[ridx]
-		result["scores"] = conclusion
+		result["conclusion"] = Analyzer.target[self.ridx]
+		result["scores"] = self.conclusion
 		result["references"] = lor
 		result["status"] = "Success"
 		result["id"] = query_uuid
 
-		self.db.insert_result_log(s.qid, conclusion[2], conclusion[1], conclusion[3], conclusion[0], result["conclusion"])
+		self.db.insert_result_log(s.qid, self.conclusion[2], self.conclusion[1], self.conclusion[3], self.conclusion[0], result["conclusion"])
 		return result
 
 class Feedback:
