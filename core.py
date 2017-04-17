@@ -350,12 +350,9 @@ class Analyzer:
 		return result
 		
 	def do(self):
-		logging.info("Start do Analyze")
 		dataset = []
 
-		logging.info("Start INIT Searcher")
 		s = Searcher(self._get_query_hoax())
-		logging.info("Finish INIT Searcher")
 
 		if not "ip" in list(self.client.keys()):
 			self.client["ip"] = "unknown"
@@ -365,16 +362,11 @@ class Analyzer:
 		query_uuid = uuid.uuid4().hex
 		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
 		print("Search for all")
-		logging.info("Start Search ALL")
 		dataset = s.search_all()
-		logging.info("Finish Search ALL")
 		self.dataset = self.__cleanup_dataset(dataset)
-		logging.info("Finish Clean Dataset")
 
-		logging.info("Going to Conclusion")
 		self.conclusion, self.ridx = self._determine_result(dataset)
 		references = self.__get_references(dataset, Analyzer.target[self.ridx])
-		logging.info("Finish Determine Conclusion")
 
 		lor = []
 		for r in references:
@@ -391,7 +383,6 @@ class Analyzer:
 			data["reason"] = r.reason
 			lor.append(data)
 
-		logging.info("Finish Gathering References")
 		result = {}
 		result["query"] = self.query
 		result["hash"] = s.query_hash

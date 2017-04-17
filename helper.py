@@ -71,14 +71,11 @@ class Searcher:
 
 	def search_all(self):
 		print("Start search for query: " + self.query)
-		logging.info("Start do SEARCH ALL")
 		cache = self._get_cache()
 		if not len(cache) > 10:
 			print("No Cache")
-			logging.info("Finish INIT SEARCH ALL")
 
 			results = (searcher.search_all(self.query))
-			logging.info("Finish SEARCH ALL for " + self.query)
 
 			articles = []
 			datasets = []
@@ -90,9 +87,7 @@ class Searcher:
 
 			datasets = [x for x in ret if x is not None]
 
-			logging.info("Finish Gathering Results")
 			self.db.insert_references(self.qid, self.query_hash, datasets)
-			logging.info("Finish Insert to DB")
 
 			return datasets
 		else:

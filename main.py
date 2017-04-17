@@ -121,7 +121,7 @@ def get_factcheck(query, queue):
 		#result = json.loads(con.read().decode('utf-8'))
 		result = con.read().decode('utf-8')
 	except:
-		result = "{\"details\": \"no result\"}"
+		result = "{\"code\":3, \"details\": \"no result\"}"
 	logging.info("Factcheck result: " + str(result))
 	queue.put(result)
 
@@ -295,7 +295,7 @@ def callback():
 
 			line_bot_api.reply_message(
 				event.reply_token,
-				TextSendMessage(text="Tunggu sebentar ya, kami akan menganalisis masukan Anda, biasanya tidak sampai 1 menit ^_^")
+				TextSendMessage(text="Please wait, we are analyzing your input, this shouldn't take more than 1 minute ^_^")
 			)
 
 			query = event.message.text
@@ -303,8 +303,8 @@ def callback():
 			analyzer = Analyzer(query, extracted_query, client)
 			result = analyzer.do()
 
-			text_result = "Hasilnya adalah " + result["conclusion"]
-			check_out = "Informasi lebih lanjut dapat dilihat di https://antihoax.azurewebsites.net/results/" + result["id"]
+			text_result = "The result is [" + (result["conclusion"]).upper() + "]"
+			check_out = "For further information, please check at https://hoaxanalyzer.com/results/" + result["id"]
 
 			line_bot_api.push_message(
 				profile_id,
