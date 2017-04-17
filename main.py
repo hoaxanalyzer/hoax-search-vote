@@ -78,14 +78,15 @@ def create_text_query(query):
 		query = ''.join([i if ord(i) < 128 else ' ' for i in query])
 		query = (query.encode('utf-8')).decode('utf-8')
 		payload = json.dumps({'text': query}).encode('utf8')
-		req = urllib.request.Request("https://hsecondary.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
+		req = urllib.request.Request("http://hsecondary.lelah.ga/extract/text", payload, {'Content-Type': 'application/json'}) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
 		extracted_query = result["query"]
 		extracted_query = extracted_query.strip()
 		extracted_query = extracted_query.lower()
-	except:
+	except Exception as e:
+		logging.info("Getting query excp: " + str(e))
 		extracted_query = query
 
 	logging.info("Extracted query: " + extracted_query)
@@ -96,13 +97,14 @@ def create_image_query(image):
 	extracted_query = ""
 	text = "error"
 	try:
-		req = urllib.request.Request("https://hsecondary.lelah.ga/extract/image", image.read()) 
+		req = urllib.request.Request("http://hsecondary.lelah.ga/extract/image", image.read()) 
 		con = urllib.request.urlopen(req, timeout=20)
 		result = json.loads(con.read().decode('utf-8'))
 
 		extracted_query = result["query"]
 		text = result["text"]
-	except:
+	except Exception as e:
+		logging.info("Getting image excp: " + str(e))
 		extracted_query = ""
 
 	return (extracted_query, text)
