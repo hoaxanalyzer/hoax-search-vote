@@ -305,13 +305,13 @@ def callback():
 
 			query = event.message.text
 
-			payload = json.dumps({'text': query}).encode('utf8')
+			payload = json.dumps({'query': query}).encode('utf8')
 			req = urllib.request.Request("https://hprimary.lelah.ga/analyze", payload, {'Content-Type': 'application/json'}) 
 			con = urllib.request.urlopen(req, timeout=20)
 			result = json.loads(con.read().decode('utf-8'))
 
 			text_result = "The result is [" + (result["conclusion"]).upper() + "]"
-			check_out = "For further information, please check at https://hoaxanalyzer.com/results/" + result["id"]
+			check_out = "For further information, please check at http://hoaxanalyzer.com/results/" + result["id"]
 
 			line_bot_api.push_message(
 				profile_id,
