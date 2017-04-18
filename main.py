@@ -89,8 +89,13 @@ def create_text_query(query):
 		logging.info("Getting query excp: " + str(e))
 		extracted_query = query
 
+	try:
+		query_neg = result["is_negation"]
+	except:
+		query_neg = False
+
 	logging.info("Extracted query: " + extracted_query)
-	return extracted_query
+	return (extracted_query, query_neg)
 
 def create_image_query(image):
 	logging.info("Getting image")
@@ -121,7 +126,7 @@ def get_factcheck(query, queue):
 		#result = json.loads(con.read().decode('utf-8'))
 		result = con.read().decode('utf-8')
 	except:
-		result = "{\"code\":3, \"details\": \"no result\"}"
+		result = "{\"code\":3, \"details\": \"no result\", \"is_negate\": false}"
 	logging.info("Factcheck result: " + str(result))
 	queue.put(result)
 
@@ -142,8 +147,8 @@ def analyze():
 	thread_fc = mp.Process(target=get_factcheck, args=(query, the_queue,))
 	thread_fc.start()
 
-	extracted_query = create_text_query(query)
-	analyzer = Analyzer(query, extracted_query, client)
+	extracted_query, qneg = create_text_query(query)
+	analyzer = Analyzer(query, extracted_query, client, qneg)
 	result = analyzer.do()
 
 	thread_fc.join
@@ -299,8 +304,8 @@ def callback():
 			)
 
 			query = event.message.text
-			extracted_query = create_text_query(query)
-			analyzer = Analyzer(query, extracted_query, client)
+			extracted_query, qneg = create_text_query(query)
+			analyzer = Analyzer(query, extracted_query, client, qneg)
 			result = analyzer.do()
 
 			text_result = "The result is [" + (result["conclusion"]).upper() + "]"

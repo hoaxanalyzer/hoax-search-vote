@@ -16,8 +16,9 @@ from database import Database
 
 class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
+	target_neg = ['unrelated', 'hoax', 'fact', 'unknown']
 
-	def __init__(self, text, query, client=None):
+	def __init__(self, text, query, client=None, qneg=False):
 		self.text = ''.join([i if ord(i) < 128 else ' ' for i in text])
 		#self.query = query
 		self.query = ' '.join(self.__query_unique_list(query.split()))
@@ -27,6 +28,7 @@ class Analyzer:
 			self.client = {}
 
 		self.retrieved = None
+		self.qneg = qneg
 		self.db = Database()
 	
 	def _get_query_hoax(self):
@@ -309,7 +311,7 @@ class Analyzer:
 		if not query == None:
 			self.query = query["query_search"]
 			self.text = query["query_text"]
-
+			self.qneg = query["query_negation"]
 			s = Searcher(self.query)
 			dataset = s.get_news(query["query_hash"])
 			self.dataset = self.__cleanup_dataset(dataset)
@@ -322,7 +324,15 @@ class Analyzer:
 				data = {}
 				data["url"] = r.url
 				data["url_base"] = r.url_base
-				data["label"] = r.label
+				if not self.qneg:
+					data["label"] = r.label
+				else:
+					if r.label == Analyzer.target[1]:
+						data["label"] = Analyzer.target_neg[1]
+					elif r.label == Analyzer.target[2]:
+						data["label"] = Analyzer.target_neg[2]
+					else:
+						data["label"] = r.label
 				data["text"] = r.content[:900] + "... (see more at source)"
 				data["id"] = r.ahash
 				data["site_score"] = r.url_score
@@ -333,11 +343,17 @@ class Analyzer:
 				lor.append(data)
 
 			result = {}
+			result["is_neg"] = self.qneg
 			result["inputText"] = query["query_text"]
 			result["hash"] = query["query_hash"]
 			result["query_search"] = query["query_search"]
-			result["conclusion"] = Analyzer.target[self.ridx]
-			result["scores"] = self.conclusion
+			if not self.qneg:
+				result["conclusion"] = Analyzer.target[self.ridx]
+				result["scores"] = self.conclusion
+			else:
+				result["conclusion"] = Analyzer.target_neg[self.ridx]
+				neg_concl = [self.conclusion[0], self.conclusion[2], self.conclusion[1], self.conclusion[3]]
+				result["scores"] = neg_concl
 			result["references"] = lor
 			result["status"] = "Success"
 			result["id"] = loghash
@@ -360,7 +376,7 @@ class Analyzer:
 			self.client["browser"] = "unknown"
 
 		query_uuid = uuid.uuid4().hex
-		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"]))
+		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"], self.qneg))
 		print("Search for all")
 		dataset = s.search_all()
 		self.dataset = self.__cleanup_dataset(dataset)
@@ -373,7 +389,15 @@ class Analyzer:
 			data = {}
 			data["url"] = r.url
 			data["url_base"] = r.url_base
-			data["label"] = r.label
+			if not self.qneg:
+				data["label"] = r.label
+			else:
+				if r.label == Analyzer.target[1]:
+					data["label"] = Analyzer.target_neg[1]
+				elif r.label == Analyzer.target[2]:
+					data["label"] = Analyzer.target_neg[2]
+				else:
+					data["label"] = r.label
 			data["text"] = r.content[:900] + "... (see more at source)"
 			data["id"] = r.ahash
 			data["site_score"] = r.url_score
@@ -384,10 +408,16 @@ class Analyzer:
 			lor.append(data)
 
 		result = {}
+		result["is_neg"] = self.qneg
 		result["query"] = self.query
 		result["hash"] = s.query_hash
-		result["conclusion"] = Analyzer.target[self.ridx]
-		result["scores"] = self.conclusion
+		if not self.qneg:
+			result["conclusion"] = Analyzer.target[self.ridx]
+			result["scores"] = self.conclusion
+		else:
+			result["conclusion"] = Analyzer.target_neg[self.ridx]
+			neg_concl = [self.conclusion[0], self.conclusion[2], self.conclusion[1], self.conclusion[3]]
+			result["scores"] = neg_concl
 		result["references"] = lor
 		result["status"] = "Success"
 		result["id"] = query_uuid
