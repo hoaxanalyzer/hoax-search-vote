@@ -304,9 +304,11 @@ def callback():
 			)
 
 			query = event.message.text
-			extracted_query, qneg = create_text_query(query)
-			analyzer = Analyzer(query, extracted_query, client, qneg)
-			result = analyzer.do()
+
+			payload = json.dumps({'text': query}).encode('utf8')
+			req = urllib.request.Request("https://hprimary.lelah.ga/analyze", payload, {'Content-Type': 'application/json'}) 
+			con = urllib.request.urlopen(req, timeout=20)
+			result = json.loads(con.read().decode('utf-8'))
 
 			text_result = "The result is [" + (result["conclusion"]).upper() + "]"
 			check_out = "For further information, please check at https://hoaxanalyzer.com/results/" + result["id"]
