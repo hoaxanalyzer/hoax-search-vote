@@ -295,6 +295,13 @@ class Analyzer:
 
 		self.ridx = self.__do_voting(conclusion, self.sites)
 		self.conclusion = conclusion
+
+		if self.qneg:
+			self.conclusion = [self.conclusion[0], self.conclusion[2], self.conclusion[1], self.conclusion[3]]
+			if self.ridx == 1:
+				self.ridx = 2
+			elif self.ridx == 2:
+				self.ridx = 1
 		return (self.conclusion, self.ridx)
 
 	def result(self):
