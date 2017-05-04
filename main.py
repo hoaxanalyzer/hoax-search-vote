@@ -88,14 +88,17 @@ def create_text_query(query):
 	except Exception as e:
 		logging.info("Getting query excp: " + str(e))
 		extracted_query = query
+		lang = "en"
 
 	try:
 		query_neg = result["is_negation"]
+		lang = result["language"]
 	except:
 		query_neg = False
+		lang = "en"
 
 	logging.info("Extracted query: " + extracted_query)
-	return (extracted_query, query_neg)
+	return (extracted_query, query_neg, lang)
 
 def create_image_query(image):
 	logging.info("Getting image")
@@ -147,8 +150,8 @@ def analyze():
 	thread_fc = mp.Process(target=get_factcheck, args=(query, the_queue,))
 	thread_fc.start()
 
-	extracted_query, qneg = create_text_query(query)
-	analyzer = Analyzer(query, extracted_query, client, qneg)
+	extracted_query, qneg, lang = create_text_query(query)
+	analyzer = Analyzer(query, extracted_query, client, qneg, lang)
 	result = analyzer.do()
 
 	thread_fc.join

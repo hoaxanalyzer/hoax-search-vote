@@ -22,10 +22,10 @@ class Database:
 			self.cur.close()
 			self.conn.close()
 
-	def insert_query_log(self, lhash, text, search, qhash, ip, browser, qneg): 	
-		sql = "INSERT INTO log_query (log_hash, query_text, query_search, query_hash, query_negation, query_time, client_ip, client_browser, clicked) VALUES" + \
-					"(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-		self.cur.execute(sql, (lhash, text, search, qhash, qneg, datetime.now(), ip, browser, 0))
+	def insert_query_log(self, lhash, text, search, qhash, ip, browser, qneg, lang): 	
+		sql = "INSERT INTO log_query (log_hash, query_text, query_search, query_hash, query_negation, query_time, client_ip, client_browser, language, clicked) VALUES" + \
+					"(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+		self.cur.execute(sql, (lhash, text, search, qhash, qneg, datetime.now(), ip, browser, lang, 0))
 		self.conn.commit()
 		return self.cur.lastrowid
 
