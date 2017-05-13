@@ -82,7 +82,7 @@ class Searcher:
 
 			results = [o + (self.query_hash, self.query,) for o in results]
 
-			with multiprocessing.Pool(processes=16) as pool: 
+			with multiprocessing.Pool(processes=16) as pool:
 				ret = pool.map(create_article, results)
 
 			datasets = [x for x in ret if x is not None]

@@ -18,7 +18,7 @@ class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 	target_neg = ['unrelated', 'hoax', 'fact', 'unknown']
 
-	def __init__(self, text, query, client=None, qneg=False, lang="en"):
+	def __init__(self, text, query, client=None, qneg=False, lang="en", qtype="unknown"):
 		self.text = ''.join([i if ord(i) < 128 else ' ' for i in text])
 		#self.query = query
 		self.query = ' '.join(self.__query_unique_list(query.split()))
@@ -29,6 +29,7 @@ class Analyzer:
 
 		self.retrieved = None
 		self.qneg = qneg
+		self.qtype = qtype
 		self.lang = lang
 		self.db = Database()
 	
@@ -384,7 +385,7 @@ class Analyzer:
 			self.client["browser"] = "unknown"
 
 		query_uuid = uuid.uuid4().hex
-		s.set_qid(self.db.insert_query_log(query_uuid, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"], self.qneg, self.lang))
+		s.set_qid(self.db.insert_query_log(query_uuid, self.qtype, self.text, self.query, s.query_hash, self.client["ip"], self.client["browser"], self.qneg, self.lang))
 		print("Search for all")
 		dataset = s.search_all()
 		self.dataset = self.__cleanup_dataset(dataset)

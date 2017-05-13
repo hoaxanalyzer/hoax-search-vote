@@ -89,16 +89,19 @@ def create_text_query(query):
 		logging.info("Getting query excp: " + str(e))
 		extracted_query = query
 		lang = "en"
+		qtype = "unknown"
 
 	try:
 		query_neg = result["is_negation"]
 		lang = result["language"]
+		qtype = result["type"]
 	except:
 		query_neg = False
 		lang = "en"
+		qtype = "text"
 
 	logging.info("Extracted query: " + extracted_query)
-	return (extracted_query, query_neg, lang)
+	return (extracted_query, query_neg, lang, qtype)
 
 def create_image_query(image):
 	logging.info("Getting image")
@@ -111,11 +114,16 @@ def create_image_query(image):
 
 		extracted_query = result["query"]
 		text = result["text"]
+		lang = result["language"]
+		qtype = result["type"]
 	except Exception as e:
 		logging.info("Getting image excp: " + str(e))
 		extracted_query = ""
+		text = "error"
+		lang = "unk"
+		qtype = "image"
 
-	return (extracted_query, text)
+	return (extracted_query, text, lang, qtype)
 
 def get_factcheck(query, queue):
 	logging.info("Factcheck query: " + query)
@@ -150,8 +158,8 @@ def analyze():
 	thread_fc = mp.Process(target=get_factcheck, args=(query, the_queue,))
 	thread_fc.start()
 
-	extracted_query, qneg, lang = create_text_query(query)
-	analyzer = Analyzer(query, extracted_query, client, qneg, lang)
+	extracted_query, qneg, lang, qtype = create_text_query(query)
+	analyzer = Analyzer(query, extracted_query, client, qneg, lang, qtype)
 	result = analyzer.do()
 
 	thread_fc.join
@@ -183,12 +191,12 @@ def analyze_image():
 			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No filename"})
 
 		if file:
-			extracted_query, text = create_image_query(file)
+			extracted_query, text, lang, qtype = create_image_query(file)
 
 			if len(extracted_query) <= 2:
 				return json.dumps({"status": "Failed", "message": "No query extracted", "details": "No query extracted"})
 			
-			analyzer = Analyzer(text, extracted_query, None)
+			analyzer = Analyzer(text, extracted_query, None, lang, qtype)
 			result = json.dumps(analyzer.do())
 	except Exception as e:
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
