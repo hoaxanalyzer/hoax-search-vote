@@ -18,7 +18,7 @@ class Analyzer:
 	target = ['unrelated', 'fact', 'hoax', 'unknown']
 	target_neg = ['unrelated', 'hoax', 'fact', 'unknown']
 
-	def __init__(self, text, query, client=None, qneg=False, lang="en", qtype="unknown"):
+	def __init__(self, text, query, client=None, qneg=False, lang="en", qtype="undefined"):
 		self.text = ''.join([i if ord(i) < 128 else ' ' for i in text])
 		#self.query = query
 		self.query = ' '.join(self.__query_unique_list(query.split()))

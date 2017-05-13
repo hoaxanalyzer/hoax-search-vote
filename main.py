@@ -115,15 +115,17 @@ def create_image_query(image):
 		extracted_query = result["query"]
 		text = result["text"]
 		lang = result["language"]
-		qtype = result["type"]
+		qneg = result["is_negation"]
+		qtype = "image"
 	except Exception as e:
 		logging.info("Getting image excp: " + str(e))
 		extracted_query = ""
 		text = "error"
 		lang = "unk"
+		qneg = False
 		qtype = "image"
 
-	return (extracted_query, text, lang, qtype)
+	return (extracted_query, text, qneg, lang, qtype)
 
 def get_factcheck(query, queue):
 	logging.info("Factcheck query: " + query)
@@ -191,12 +193,12 @@ def analyze_image():
 			return json.dumps({"status": "Failed", "message": "No image file found", "details": "No filename"})
 
 		if file:
-			extracted_query, text, lang, qtype = create_image_query(file)
+			extracted_query, text, qneg, lang, qtype = create_image_query(file)
 
 			if len(extracted_query) <= 2:
 				return json.dumps({"status": "Failed", "message": "No query extracted", "details": "No query extracted"})
 			
-			analyzer = Analyzer(text, extracted_query, None, lang, qtype)
+			analyzer = Analyzer(text, extracted_query, None, qneg, lang, qtype)
 			result = json.dumps(analyzer.do())
 	except Exception as e:
 		result = json.dumps({"status": "Failed", "message": "Incorrect parameters", "details": str(e)})
