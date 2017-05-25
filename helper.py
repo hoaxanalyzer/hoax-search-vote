@@ -104,8 +104,9 @@ class Searcher:
 		datasets = []
 		for a in articles:
 			a.update({"query": self.query})
-		with multiprocessing.Pool(processes=len(articles)) as pool: 
-			datasets = pool.map(create_article_db, articles)
+		if len(articles) != 0:
+			with multiprocessing.Pool(processes=len(articles)) as pool: 
+				datasets = pool.map(create_article_db, articles)
 		return datasets
 
 class Similar:
